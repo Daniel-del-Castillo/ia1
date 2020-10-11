@@ -2,8 +2,6 @@ use crossterm::style::Colorize;
 use std::fmt;
 mod content;
 use content::Content;
-mod error;
-use error::GridError;
 
 pub struct Grid {
     grid: Vec<Vec<Content>>,
@@ -42,40 +40,45 @@ impl Grid {
         }
     }
 
-    pub fn set_wall(&mut self, x: usize, y: usize) -> Result<(), GridError> {
+    pub fn m(&self) -> usize {
+        self.grid.len()
+    }
+
+    pub fn n(&self) -> usize {
+        self.grid[0].len()
+    }
+
+    pub fn set_wall(&mut self, x: usize, y: usize) {
         match &mut self.grid[y][x] {
-            Content::Car => Err(GridError::OverwriteCar),
-            Content::Goal => Err(GridError::OverwriteGoal),
-            content => {
-                *content = Content::Wall;
-                Ok(())
-            }
+            Content::Car => self.car = None,
+            Content::Goal => self.goal = None,
+            content => *content = Content::Wall,
         }
     }
 
-    pub fn set_goal(&mut self, x: usize, y: usize) -> Result<(), GridError> {
+    pub fn set_goal(&mut self, x: usize, y: usize) {
         match &mut self.grid[y][x] {
-            Content::Car => return Err(GridError::OverwriteCar),
-            Content::Goal => return Ok(()),
-            content => *content = Content::Goal,
+            Content::Car => self.car = None,
+            Content::Goal => return,
+            _ => {}
         }
+        self.grid[y][x] = Content::Goal;
         if let Some(old_goal_pos) = &mut self.goal {
             self.grid[old_goal_pos.1][old_goal_pos.0] = Content::Empty;
         }
         self.goal = Some((x, y));
-        Ok(())
     }
 
-    pub fn set_car(&mut self, x: usize, y: usize) -> Result<(), GridError> {
+    pub fn set_car(&mut self, x: usize, y: usize) {
         match &mut self.grid[y][x] {
-            Content::Car => return Ok(()),
-            Content::Goal => return Err(GridError::OverwriteGoal),
-            content => *content = Content::Car,
+            Content::Goal => self.goal = None,
+            Content::Car => return,
+            _ => {}
         }
+        self.grid[y][x] = Content::Car;
         if let Some(old_car_pos) = &mut self.car {
             self.grid[old_car_pos.1][old_car_pos.0] = Content::Empty;
         }
-        self.goal = Some((x, y));
-        Ok(())
+        self.car = Some((x, y));
     }
 }
