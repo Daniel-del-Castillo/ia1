@@ -13,6 +13,12 @@ use events::process_event;
 mod screen;
 use screen::draw_screen;
 
+#[derive(PartialEq)]
+pub enum State {
+    Car,
+    Goal,
+    Wall,
+}
 fn main() -> Result<()> {
     execute!(stdout(), Hide, EnableMouseCapture, EnterAlternateScreen)?;
     enable_raw_mode()?;
@@ -21,8 +27,9 @@ fn main() -> Result<()> {
 }
 
 fn event_loop(grid: &mut Grid) -> Result<()> {
+    let mut state = State::Wall;
     loop {
-        draw_screen(grid)?;
-        process_event()?;
+        draw_screen(grid, &state)?;
+        process_event(&mut state)?;
     }
 }
