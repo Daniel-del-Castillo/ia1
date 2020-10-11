@@ -59,10 +59,10 @@ impl Grid {
             Content::Goal => return Ok(()),
             content => *content = Content::Goal,
         }
-        match &mut self.goal {
-            Some(old_goal_pos) => self.grid[old_goal_pos.1][old_goal_pos.0] = Content::Empty,
-            goal => *goal = Some((x, y)),
+        if let Some(old_goal_pos) = &mut self.goal {
+            self.grid[old_goal_pos.1][old_goal_pos.0] = Content::Empty;
         }
+        self.goal = Some((x, y));
         Ok(())
     }
 
@@ -72,10 +72,10 @@ impl Grid {
             Content::Goal => return Err(GridError::OverwriteGoal),
             content => *content = Content::Car,
         }
-        match &mut self.car {
-            Some(old_car_pos) => self.grid[old_car_pos.1][old_car_pos.0] = Content::Empty,
-            car => *car = Some((x, y)),
+        if let Some(old_car_pos) = &mut self.car {
+            self.grid[old_car_pos.1][old_car_pos.0] = Content::Empty;
         }
+        self.goal = Some((x, y));
         Ok(())
     }
 }
