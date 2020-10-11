@@ -1,4 +1,5 @@
 use crossterm::{
+    cursor::Show,
     event::{read, DisableMouseCapture, Event, MouseButton, MouseEvent},
     execute,
     terminal::{disable_raw_mode, size, LeaveAlternateScreen},
@@ -24,6 +25,6 @@ pub fn process_event() -> Result<()> {
 
 fn quit() -> ! {
     disable_raw_mode().unwrap();
-    execute!(stdout(), LeaveAlternateScreen, DisableMouseCapture).unwrap();
+    execute!(stdout(), LeaveAlternateScreen, DisableMouseCapture, Show).unwrap();
     std::process::exit(0);
 }
