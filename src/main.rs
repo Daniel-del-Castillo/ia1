@@ -7,19 +7,16 @@ use crossterm::{
 use std::fmt::Write as fmt_Write;
 use std::io::{stdout, Write};
 mod grid;
-use grid::{Content, Grid};
+use grid::Grid;
 
 fn main() -> Result<()> {
     execute!(stdout(), EnterAlternateScreen)?;
     execute!(stdout(), Hide)?;
-    let grid = Grid {
-        grid: vec![
-            vec![Content::Wall, Content::Empty],
-            vec![Content::Wall, Content::Car],
-        ],
-        m: 2,
-        n: 2,
-    };
+    let mut grid = Grid::new(2, 2);
+    grid.set_wall(0, 0).ok();
+    grid.set_wall(0, 1).ok();
+    grid.set_goal(1, 0).ok();
+    grid.set_car(1, 1).ok();
     let mut buf = String::new();
     queue!(buf, Clear(ClearType::All))?;
     queue!(buf, MoveTo(0, 0))?;
