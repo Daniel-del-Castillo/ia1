@@ -21,32 +21,44 @@ const QUIT_BUTTON_END: u16 = 48;
 
 pub fn process_event(grid: &mut Grid, state: &mut State) -> Result<()> {
     let buttons_y = size()?.1 - 2;
-    if let Event::Mouse(MouseEvent::Down(MouseButton::Left, x, y, ..)) = read()? {
-        //If it is inside the border walls of the grid. Keep in mind that walls take two spaces wide
-        if is_inside(grid, x, y) {
-            match state {
-                State::Car => grid.set_car(x as usize / 2 - 1, y as usize - 1),
-                State::Goal => grid.set_goal(x as usize / 2 - 1, y as usize - 1),
-                State::Wall => grid.set_wall(x as usize / 2 - 1, y as usize - 1),
-                State::Remove => grid.set_empty(x as usize / 2 - 1, y as usize - 1),
+    match read()? {
+        Event::Mouse(MouseEvent::Down(MouseButton::Left, x, y, ..)) => {
+            if is_inside(grid, x, y) {
+                match state {
+                    State::Car => grid.set_car(x as usize / 2 - 1, y as usize - 1),
+                    State::Goal => grid.set_goal(x as usize / 2 - 1, y as usize - 1),
+                    State::Wall => grid.set_wall(x as usize / 2 - 1, y as usize - 1),
+                    State::Remove => grid.set_empty(x as usize / 2 - 1, y as usize - 1),
+                }
+            } else if y != buttons_y {
+                return Ok(());
+            } else if x >= CAR_BUTTON_BEGIN && x <= CAR_BUTTON_END {
+                *state = State::Car;
+            } else if x >= GOAL_BUTTON_BEGIN && x <= GOAL_BUTTON_END {
+                *state = State::Goal;
+            } else if x >= WALL_BUTTON_BEGIN && x <= WALL_BUTTON_END {
+                *state = State::Wall;
+            } else if x >= REMOVE_BUTTON_BEGIN && x <= REMOVE_BUTTON_END {
+                *state = State::Remove;
+            } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
+                quit();
             }
-        } else if y != buttons_y {
-            return Ok(());
-        } else if x >= CAR_BUTTON_BEGIN && x <= CAR_BUTTON_END {
-            *state = State::Car;
-        } else if x >= GOAL_BUTTON_BEGIN && x <= GOAL_BUTTON_END {
-            *state = State::Goal;
-        } else if x >= WALL_BUTTON_BEGIN && x <= WALL_BUTTON_END {
-            *state = State::Wall;
-        } else if x >= REMOVE_BUTTON_BEGIN && x <= REMOVE_BUTTON_END {
-            *state = State::Remove;
-        } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
-            quit();
         }
+        Event::Mouse(MouseEvent::Drag(MouseButton::Left, x, y, ..)) => {
+            if is_inside(grid, x, y) {
+                match state {
+                    State::Wall => grid.set_wall(x as usize / 2 - 1, y as usize - 1),
+                    State::Remove => grid.set_empty(x as usize / 2 - 1, y as usize - 1),
+                    _ => {}
+                }
+            }
+        }
+        _ => {}
     }
     Ok(())
 }
 
+//keep in mind that cell are two spaces wide
 fn is_inside(grid: &Grid, x: u16, y: u16) -> bool {
     x <= grid.n() as u16 * 2 + 1 && x >= 2 && y <= grid.m() as u16 && y >= 1
 }
