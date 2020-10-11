@@ -31,7 +31,7 @@ fn draw_buttons(buf: &mut String, state: &State) -> Result<()> {
     queue!(buf, MoveTo(0, size()?.1 - 2))?;
     write!(
         buf,
-        "{0}Rows{1} {0}Columns{1} {2} {3} {4} {5} {6}\n\r",
+        "{0}Rows{1} {0}Columns{1} {2} {3} {4} {5} {6} {7}\n\r",
         "--".negative(),
         "++".negative(),
         if *state == State::Car {
@@ -48,6 +48,11 @@ fn draw_buttons(buf: &mut String, state: &State) -> Result<()> {
             "Wall".bold()
         } else {
             "Wall".negative()
+        },
+        if *state == State::Remove {
+            "Remove".bold()
+        } else {
+            "Remove".negative()
         },
         "Run".negative(),
         "Quit".negative()

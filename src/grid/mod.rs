@@ -52,8 +52,9 @@ impl Grid {
         match &mut self.grid[y][x] {
             Content::Car => self.car = None,
             Content::Goal => self.goal = None,
-            content => *content = Content::Wall,
+            _ => {}
         }
+        self.grid[y][x] = Content::Wall;
     }
 
     pub fn set_goal(&mut self, x: usize, y: usize) {
@@ -80,5 +81,14 @@ impl Grid {
             self.grid[old_car_pos.1][old_car_pos.0] = Content::Empty;
         }
         self.car = Some((x, y));
+    }
+
+    pub fn set_empty(&mut self, x: usize, y: usize) {
+        match &mut self.grid[y][x] {
+            Content::Goal => self.goal = None,
+            Content::Car => self.car = None,
+            _ => {}
+        }
+        self.grid[y][x] = Content::Empty;
     }
 }

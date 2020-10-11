@@ -14,8 +14,10 @@ const GOAL_BUTTON_BEGIN: u16 = 25;
 const GOAL_BUTTON_END: u16 = 28;
 const WALL_BUTTON_BEGIN: u16 = 30;
 const WALL_BUTTON_END: u16 = 33;
-const QUIT_BUTTON_BEGIN: u16 = 39;
-const QUIT_BUTTON_END: u16 = 42;
+const REMOVE_BUTTON_BEGIN: u16 = 35;
+const REMOVE_BUTTON_END: u16 = 40;
+const QUIT_BUTTON_BEGIN: u16 = 45;
+const QUIT_BUTTON_END: u16 = 48;
 
 pub fn process_event(grid: &mut Grid, state: &mut State) -> Result<()> {
     let buttons_y = size()?.1 - 2;
@@ -26,6 +28,7 @@ pub fn process_event(grid: &mut Grid, state: &mut State) -> Result<()> {
                 State::Car => grid.set_car(x as usize / 2 - 1, y as usize - 1),
                 State::Goal => grid.set_goal(x as usize / 2 - 1, y as usize - 1),
                 State::Wall => grid.set_wall(x as usize / 2 - 1, y as usize - 1),
+                State::Remove => grid.set_empty(x as usize / 2 - 1, y as usize - 1),
             }
         } else if y != buttons_y {
             return Ok(());
@@ -35,6 +38,8 @@ pub fn process_event(grid: &mut Grid, state: &mut State) -> Result<()> {
             *state = State::Goal;
         } else if x >= WALL_BUTTON_BEGIN && x <= WALL_BUTTON_END {
             *state = State::Wall;
+        } else if x >= REMOVE_BUTTON_BEGIN && x <= REMOVE_BUTTON_END {
+            *state = State::Remove;
         } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
             quit();
         }

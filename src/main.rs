@@ -18,6 +18,7 @@ pub enum State {
     Car,
     Goal,
     Wall,
+    Remove,
 }
 fn main() -> Result<()> {
     execute!(stdout(), Hide, EnableMouseCapture, EnterAlternateScreen)?;
