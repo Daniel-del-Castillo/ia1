@@ -16,18 +16,18 @@ impl fmt::Display for Grid {
         for _ in 0..self.grid[0].len() + 2 {
             write!(f, "{}", "██".dark_blue())?;
         }
-        write!(f, "\n")?;
+        write!(f, "\n\r")?;
         for row in self.grid.iter() {
             write!(f, "{}", "██".dark_blue())?;
             for cell in row.iter() {
                 write!(f, "{}", cell)?
             }
-            write!(f, "{}", "██\n".dark_blue())?;
+            write!(f, "{}", "██\n\r".dark_blue())?;
         }
         for _ in 0..self.grid[0].len() + 2 {
             write!(f, "{}", "██".dark_blue())?;
         }
-        write!(f, "\n")?;
+        write!(f, "\n\r")?;
         Ok(())
     }
 }
