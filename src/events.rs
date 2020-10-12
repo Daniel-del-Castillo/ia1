@@ -6,8 +6,17 @@ use crossterm::{
     terminal::{disable_raw_mode, size, LeaveAlternateScreen},
     Result,
 };
+use std::cmp::{max, min};
 use std::io::{stdout, Write};
 
+const ROWS_MINUS_BUTTON_BEGIN: u16 = 0;
+const ROWS_MINUS_BUTTON_END: u16 = 1;
+const ROWS_PLUS_BUTTON_BEGIN: u16 = 6;
+const ROWS_PLUS_BUTTON_END: u16 = 7;
+const COLUMNS_MINUS_BUTTON_BEGIN: u16 = 9;
+const COLUMNS_MINUS_BUTTON_END: u16 = 10;
+const COLUMNS_PLUS_BUTTON_BEGIN: u16 = 18;
+const COLUMNS_PLUS_BUTTON_END: u16 = 19;
 const CAR_BUTTON_BEGIN: u16 = 21;
 const CAR_BUTTON_END: u16 = 23;
 const GOAL_BUTTON_BEGIN: u16 = 25;
@@ -20,7 +29,8 @@ const QUIT_BUTTON_BEGIN: u16 = 45;
 const QUIT_BUTTON_END: u16 = 48;
 
 pub fn process_event(grid: &mut Grid, state: &mut State) -> Result<()> {
-    let buttons_y = size()?.1 - 2;
+    let term_size = size()?;
+    let buttons_y = term_size.1 - 2;
     match read()? {
         Event::Mouse(MouseEvent::Down(MouseButton::Left, x, y, ..)) => {
             if is_inside(grid, x, y) {
@@ -32,6 +42,18 @@ pub fn process_event(grid: &mut Grid, state: &mut State) -> Result<()> {
                 }
             } else if y != buttons_y {
                 return Ok(());
+            } else if x >= ROWS_MINUS_BUTTON_BEGIN && x <= ROWS_MINUS_BUTTON_END {
+                let desired_height = grid.m() - 1;
+                grid.set_height(min(max(desired_height, 1), term_size.1 as usize - 4));
+            } else if x >= ROWS_PLUS_BUTTON_BEGIN && x <= ROWS_PLUS_BUTTON_END {
+                let desired_height = grid.m() + 1;
+                grid.set_height(min(max(desired_height, 1), term_size.1 as usize - 4));
+            } else if x >= COLUMNS_MINUS_BUTTON_BEGIN && x <= COLUMNS_MINUS_BUTTON_END {
+                let desired_width = grid.n() - 1;
+                grid.set_width(min(max(desired_width, 1), term_size.0 as usize / 2 - 2));
+            } else if x >= COLUMNS_PLUS_BUTTON_BEGIN && x <= COLUMNS_PLUS_BUTTON_END {
+                let desired_width = grid.n() + 1;
+                grid.set_width(min(max(desired_width, 1), term_size.0 as usize / 2 - 2));
             } else if x >= CAR_BUTTON_BEGIN && x <= CAR_BUTTON_END {
                 *state = State::Car;
             } else if x >= GOAL_BUTTON_BEGIN && x <= GOAL_BUTTON_END {

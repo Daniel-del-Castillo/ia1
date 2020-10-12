@@ -32,7 +32,7 @@ impl fmt::Display for Grid {
 
 impl Grid {
     pub fn new(m: usize, n: usize) -> Self {
-        assert!(m != 0 || n != 0 || m * n >= 2);
+        assert!(m != 0 && n != 0);
         Grid {
             grid: vec![vec![Content::Empty; n]; m],
             goal: None,
@@ -46,6 +46,33 @@ impl Grid {
 
     pub fn n(&self) -> usize {
         self.grid[0].len()
+    }
+
+    pub fn set_width(&mut self, n: usize) {
+        assert!(n != 0);
+        let width = self.grid[0].len();
+        if n == width {
+            return;
+        } else if n < width {
+            self.grid.iter_mut().for_each(|row| row.truncate(n));
+        } else {
+            self.grid
+                .iter_mut()
+                .for_each(|row| (0..n - width).for_each(|_| row.push(Content::Empty)));
+        }
+    }
+
+    pub fn set_height(&mut self, m: usize) {
+        assert!(m != 0);
+        let height = self.grid.len();
+        if m == height {
+            return;
+        } else if m < height {
+            self.grid.truncate(m);
+        } else {
+            let width = self.grid[0].len();
+            (0..m - height).for_each(|_| self.grid.push(vec![Content::Empty; width]));
+        }
     }
 
     pub fn set_wall(&mut self, x: usize, y: usize) {
