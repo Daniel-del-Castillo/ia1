@@ -1,5 +1,5 @@
 use clap::{App, Arg, ArgMatches};
-use crossterm::Result;
+use crossterm::{terminal::size, Result};
 mod grid;
 use grid::Grid;
 mod frontend;
@@ -7,6 +7,7 @@ use frontend::FrontEnd;
 
 fn main() -> Result<()> {
     let (m, n) = parse_args();
+    check_valid_size(m, n)?;
     let grid = Grid::new(m, n);
     let mut frontend = FrontEnd::new(grid);
     frontend.run()
@@ -49,4 +50,30 @@ fn declare_args() -> ArgMatches<'static> {
                 .help("Set the number of initial columns"),
         )
         .get_matches()
+}
+
+fn check_valid_size(m: usize, n: usize) -> Result<()> {
+    let term_size = size()?;
+    if m > term_size.1 as usize - 4 {
+        eprintln!(
+            "There isn't space in your terminal for a grid with a height of {}",
+            m
+        );
+        eprintln!(
+            "The maximum for the actual size of your terminal is {}",
+            term_size.1 as usize - 4
+        );
+        std::process::exit(-1);
+    } else if n > term_size.0 as usize / 2 - 2 {
+        eprintln!(
+            "There isn't space in your terminal for a grid with a width of {}",
+            n
+        );
+        eprintln!(
+            "The maximum for the actual size of your terminal is {}",
+            term_size.0 as usize / 2 - 2
+        );
+        std::process::exit(-1);
+    }
+    Ok(())
 }
