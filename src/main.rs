@@ -15,8 +15,8 @@ fn main() -> Result<()> {
 
 fn parse_args() -> (usize, usize) {
     let matches = declare_args();
-    let m = matches.value_of("rows").unwrap_or("10");
-    let n = matches.value_of("columns").unwrap_or("10");
+    let m = matches.value_of("m").unwrap_or("10");
+    let n = matches.value_of("n").unwrap_or("10");
     let m = match m.parse() {
         Err(_) | Ok(0) => {
             eprintln!("The -m parameter must be a positive integer");
@@ -38,14 +38,16 @@ fn parse_args() -> (usize, usize) {
 fn declare_args() -> ArgMatches<'static> {
     App::new("ia1")
         .arg(
-            Arg::with_name("rows")
+            Arg::with_name("m")
                 .short("m")
+                .long("rows")
                 .takes_value(true)
                 .help("Set the number of initial rows"),
         )
         .arg(
-            Arg::with_name("columns")
+            Arg::with_name("n")
                 .short("n")
+                .long("columns")
                 .takes_value(true)
                 .help("Set the number of initial columns"),
         )
