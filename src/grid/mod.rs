@@ -118,4 +118,8 @@ impl Grid {
         }
         self.grid[y][x] = Content::Empty;
     }
+
+    pub fn clear(&mut self) {
+        self.grid = vec![vec![Content::Empty; self.grid[0].len()]; self.grid.len()];
+    }
 }

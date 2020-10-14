@@ -25,8 +25,10 @@ const WALL_BUTTON_BEGIN: u16 = 30;
 const WALL_BUTTON_END: u16 = 33;
 const REMOVE_BUTTON_BEGIN: u16 = 35;
 const REMOVE_BUTTON_END: u16 = 40;
-const QUIT_BUTTON_BEGIN: u16 = 45;
-const QUIT_BUTTON_END: u16 = 48;
+const CLEAR_BUTTON_BEGIN: u16 = 42;
+const CLEAR_BUTTON_END: u16 = 46;
+const QUIT_BUTTON_BEGIN: u16 = 52;
+const QUIT_BUTTON_END: u16 = 55;
 
 impl FrontEnd {
     pub fn process_event(&mut self) -> Result<()> {
@@ -97,6 +99,8 @@ impl FrontEnd {
             self.state = State::Wall;
         } else if x >= REMOVE_BUTTON_BEGIN && x <= REMOVE_BUTTON_END {
             self.state = State::Remove;
+        } else if x >= CLEAR_BUTTON_BEGIN && x <= CLEAR_BUTTON_END {
+            self.grid.clear();
         } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
             quit();
         }
