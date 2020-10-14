@@ -1,7 +1,15 @@
 use crate::Grid;
 mod events;
 mod screen;
-use crossterm::Result;
+use crossterm::{
+    cursor::Hide,
+    event::EnableMouseCapture,
+    execute,
+    terminal::{enable_raw_mode, EnterAlternateScreen},
+    Result,
+};
+use std::io::{stdout, Write};
+
 #[derive(PartialEq)]
 enum State {
     Car,
@@ -24,6 +32,8 @@ impl FrontEnd {
     }
 
     pub fn run(&mut self) -> Result<()> {
+        execute!(stdout(), Hide, EnableMouseCapture, EnterAlternateScreen)?;
+        enable_raw_mode()?;
         loop {
             self.draw_screen()?;
             self.process_event()?;
