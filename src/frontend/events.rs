@@ -1,4 +1,4 @@
-use super::{FrontEnd, Grid, State};
+use super::{FrontEnd, State};
 use crossterm::{
     cursor::Show,
     event::{read, DisableMouseCapture, Event, MouseButton, MouseEvent},
@@ -34,61 +34,73 @@ impl FrontEnd {
         let buttons_y = term_size.1 - 2;
         match read()? {
             Event::Mouse(MouseEvent::Down(MouseButton::Left, x, y, ..)) => {
-                if is_inside(&self.grid, x, y) {
-                    match self.state {
-                        State::Car => self.grid.set_car(x as usize / 2 - 1, y as usize - 1),
-                        State::Goal => self.grid.set_goal(x as usize / 2 - 1, y as usize - 1),
-                        State::Wall => self.grid.set_wall(x as usize / 2 - 1, y as usize - 1),
-                        State::Remove => self.grid.set_empty(x as usize / 2 - 1, y as usize - 1),
-                    }
-                } else if y != buttons_y {
-                    return Ok(());
-                } else if x >= ROWS_MINUS_BUTTON_BEGIN && x <= ROWS_MINUS_BUTTON_END {
-                    let desired_height = self.grid.m() - 1;
-                    self.grid
-                        .set_height(min(max(desired_height, 1), term_size.1 as usize - 4));
-                } else if x >= ROWS_PLUS_BUTTON_BEGIN && x <= ROWS_PLUS_BUTTON_END {
-                    let desired_height = self.grid.m() + 1;
-                    self.grid
-                        .set_height(min(max(desired_height, 1), term_size.1 as usize - 4));
-                } else if x >= COLUMNS_MINUS_BUTTON_BEGIN && x <= COLUMNS_MINUS_BUTTON_END {
-                    let desired_width = self.grid.n() - 1;
-                    self.grid
-                        .set_width(min(max(desired_width, 1), term_size.0 as usize / 2 - 2));
-                } else if x >= COLUMNS_PLUS_BUTTON_BEGIN && x <= COLUMNS_PLUS_BUTTON_END {
-                    let desired_width = self.grid.n() + 1;
-                    self.grid
-                        .set_width(min(max(desired_width, 1), term_size.0 as usize / 2 - 2));
-                } else if x >= CAR_BUTTON_BEGIN && x <= CAR_BUTTON_END {
-                    self.state = State::Car;
-                } else if x >= GOAL_BUTTON_BEGIN && x <= GOAL_BUTTON_END {
-                    self.state = State::Goal;
-                } else if x >= WALL_BUTTON_BEGIN && x <= WALL_BUTTON_END {
-                    self.state = State::Wall;
-                } else if x >= REMOVE_BUTTON_BEGIN && x <= REMOVE_BUTTON_END {
-                    self.state = State::Remove;
-                } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
-                    quit();
+                if self.is_inside_grid((x as usize, y as usize)) {
+                    self.set_cell((x as usize, y as usize));
+                } else if y == buttons_y {
+                    self.process_clicked_button(x, term_size);
                 }
             }
             Event::Mouse(MouseEvent::Drag(MouseButton::Left, x, y, ..)) => {
-                if is_inside(&self.grid, x, y) {
-                    match self.state {
-                        State::Wall => self.grid.set_wall(x as usize / 2 - 1, y as usize - 1),
-                        State::Remove => self.grid.set_empty(x as usize / 2 - 1, y as usize - 1),
-                        _ => {}
-                    }
+                if self.is_inside_grid((x as usize, y as usize)) {
+                    self.set_cell((x as usize, y as usize));
                 }
             }
             _ => {}
         }
         Ok(())
     }
-}
 
-//keep in mind that cell are two spaces wide
-fn is_inside(grid: &Grid, x: u16, y: u16) -> bool {
-    x <= grid.n() as u16 * 2 + 1 && x >= 2 && y <= grid.m() as u16 && y >= 1
+    //keep in mind that cell are two spaces wide
+    fn is_inside_grid(&self, pos: (usize, usize)) -> bool {
+        pos.0 <= self.grid.n() * 2 + 1 && pos.0 >= 2 && pos.1 <= self.grid.m() && pos.1 >= 1
+    }
+
+    fn set_cell(&mut self, pos: (usize, usize)) {
+        match self.state {
+            State::Car => self
+                .grid
+                .set_car(pos.0 as usize / 2 - 1, pos.1 as usize - 1),
+            State::Goal => self
+                .grid
+                .set_goal(pos.0 as usize / 2 - 1, pos.1 as usize - 1),
+            State::Wall => self
+                .grid
+                .set_wall(pos.0 as usize / 2 - 1, pos.1 as usize - 1),
+            State::Remove => self
+                .grid
+                .set_empty(pos.0 as usize / 2 - 1, pos.1 as usize - 1),
+        }
+    }
+
+    fn process_clicked_button(&mut self, x: u16, term_size: (u16, u16)) {
+        if x >= ROWS_MINUS_BUTTON_BEGIN && x <= ROWS_MINUS_BUTTON_END {
+            let desired_height = self.grid.m() - 1;
+            self.grid
+                .set_height(min(max(desired_height, 1), term_size.1 as usize - 4));
+        } else if x >= ROWS_PLUS_BUTTON_BEGIN && x <= ROWS_PLUS_BUTTON_END {
+            let desired_height = self.grid.m() + 1;
+            self.grid
+                .set_height(min(max(desired_height, 1), term_size.1 as usize - 4));
+        } else if x >= COLUMNS_MINUS_BUTTON_BEGIN && x <= COLUMNS_MINUS_BUTTON_END {
+            let desired_width = self.grid.n() - 1;
+            self.grid
+                .set_width(min(max(desired_width, 1), term_size.0 as usize / 2 - 2));
+        } else if x >= COLUMNS_PLUS_BUTTON_BEGIN && x <= COLUMNS_PLUS_BUTTON_END {
+            let desired_width = self.grid.n() + 1;
+            self.grid
+                .set_width(min(max(desired_width, 1), term_size.0 as usize / 2 - 2));
+        } else if x >= CAR_BUTTON_BEGIN && x <= CAR_BUTTON_END {
+            self.state = State::Car;
+        } else if x >= GOAL_BUTTON_BEGIN && x <= GOAL_BUTTON_END {
+            self.state = State::Goal;
+        } else if x >= WALL_BUTTON_BEGIN && x <= WALL_BUTTON_END {
+            self.state = State::Wall;
+        } else if x >= REMOVE_BUTTON_BEGIN && x <= REMOVE_BUTTON_END {
+            self.state = State::Remove;
+        } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
+            quit();
+        }
+    }
 }
 
 fn quit() -> ! {
