@@ -1,13 +1,14 @@
 use super::{FrontEnd, State};
 use crossterm::{
     cursor::Show,
-    event::{read, DisableMouseCapture, Event, MouseButton, MouseEvent},
+    event::{poll, read, DisableMouseCapture, Event, MouseButton, MouseEvent},
     execute,
     terminal::{disable_raw_mode, size, LeaveAlternateScreen},
     Result,
 };
 use std::cmp::{max, min};
 use std::io::{stdout, Write};
+use std::time::Duration;
 
 const ROWS_MINUS_BUTTON_BEGIN: u16 = 0;
 const ROWS_MINUS_BUTTON_END: u16 = 1;
@@ -41,7 +42,7 @@ impl FrontEnd {
                 if self.is_inside_grid((x as usize, y as usize)) {
                     self.set_cell((x as usize, y as usize));
                 } else if y == buttons_y {
-                    self.process_clicked_button(x, term_size);
+                    self.process_clicked_button(x, term_size)?;
                 }
             }
             Event::Mouse(MouseEvent::Drag(MouseButton::Left, x, y, ..)) => {
@@ -76,23 +77,15 @@ impl FrontEnd {
         }
     }
 
-    fn process_clicked_button(&mut self, x: u16, term_size: (u16, u16)) {
+    fn process_clicked_button(&mut self, x: u16, term_size: (u16, u16)) -> Result<()> {
         if x >= ROWS_MINUS_BUTTON_BEGIN && x <= ROWS_MINUS_BUTTON_END {
-            let desired_height = self.grid.m() - 1;
-            self.grid
-                .set_height(min(max(desired_height, 1), term_size.1 as usize - 4));
+            self.change_height_while_clicked(-1, term_size.1 as usize)?;
         } else if x >= ROWS_PLUS_BUTTON_BEGIN && x <= ROWS_PLUS_BUTTON_END {
-            let desired_height = self.grid.m() + 1;
-            self.grid
-                .set_height(min(max(desired_height, 1), term_size.1 as usize - 4));
+            self.change_height_while_clicked(1, term_size.1 as usize)?;
         } else if x >= COLUMNS_MINUS_BUTTON_BEGIN && x <= COLUMNS_MINUS_BUTTON_END {
-            let desired_width = self.grid.n() - 1;
-            self.grid
-                .set_width(min(max(desired_width, 1), term_size.0 as usize / 2 - 2));
+            self.change_width_while_clicked(-1, term_size.0 as usize)?;
         } else if x >= COLUMNS_PLUS_BUTTON_BEGIN && x <= COLUMNS_PLUS_BUTTON_END {
-            let desired_width = self.grid.n() + 1;
-            self.grid
-                .set_width(min(max(desired_width, 1), term_size.0 as usize / 2 - 2));
+            self.change_width_while_clicked(1, term_size.0 as usize)?;
         } else if x >= CAR_BUTTON_BEGIN && x <= CAR_BUTTON_END {
             self.state = State::Car;
         } else if x >= GOAL_BUTTON_BEGIN && x <= GOAL_BUTTON_END {
@@ -108,6 +101,37 @@ impl FrontEnd {
         } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
             quit();
         }
+        Ok(())
+    }
+
+    fn change_height_while_clicked(&mut self, change: isize, term_height: usize) -> Result<()> {
+        loop {
+            let desired_height = self.grid.m() as isize + change;
+            self.grid
+                .set_height(min(max(desired_height, 1) as usize, term_height - 4));
+            self.draw_screen()?;
+            if let true = poll(Duration::from_millis(100))? {
+                if let Event::Mouse(MouseEvent::Up(MouseButton::Left, ..)) = read()? {
+                    break;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn change_width_while_clicked(&mut self, change: isize, term_width: usize) -> Result<()> {
+        loop {
+            let desired_width = self.grid.n() as isize + change;
+            self.grid
+                .set_width(min(max(desired_width, 1) as usize, term_width - 4));
+            self.draw_screen()?;
+            if let true = poll(Duration::from_millis(100))? {
+                if let Event::Mouse(MouseEvent::Up(MouseButton::Left, ..)) = read()? {
+                    break;
+                }
+            }
+        }
+        Ok(())
     }
 }
 
