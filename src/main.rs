@@ -6,15 +6,42 @@ mod frontend;
 use frontend::FrontEnd;
 
 fn main() -> Result<()> {
-    let (m, n) = parse_args();
+    let matches = get_args_matches();
+    let (m, n) = get_grid_size(&matches);
     check_valid_size(m, n)?;
     let grid = Grid::new(m, n);
-    let mut frontend = FrontEnd::new(grid);
+    let wall_percentage = get_wall_percentage(&matches);
+    let mut frontend = FrontEnd::new(grid, wall_percentage);
     frontend.run()
 }
 
-fn parse_args() -> (usize, usize) {
-    let matches = declare_args();
+fn get_args_matches() -> ArgMatches<'static> {
+    App::new("ia1")
+        .arg(
+            Arg::with_name("m")
+                .short("m")
+                .long("rows")
+                .takes_value(true)
+                .help("Set the number of initial rows"),
+        )
+        .arg(
+            Arg::with_name("n")
+                .short("n")
+                .long("columns")
+                .takes_value(true)
+                .help("Set the number of initial columns"),
+        )
+        .arg(
+            Arg::with_name("wall_percentage")
+                .short("r")
+                .long("random")
+                .takes_value(true)
+                .help("Set the percentage of walls in a random generated map"),
+        )
+        .get_matches()
+}
+
+fn get_grid_size(matches: &ArgMatches) -> (usize, usize) {
     let m = matches.value_of("m").unwrap_or("10");
     let n = matches.value_of("n").unwrap_or("10");
     let m = match m.parse() {
@@ -33,25 +60,6 @@ fn parse_args() -> (usize, usize) {
     };
 
     (m, n)
-}
-
-fn declare_args() -> ArgMatches<'static> {
-    App::new("ia1")
-        .arg(
-            Arg::with_name("m")
-                .short("m")
-                .long("rows")
-                .takes_value(true)
-                .help("Set the number of initial rows"),
-        )
-        .arg(
-            Arg::with_name("n")
-                .short("n")
-                .long("columns")
-                .takes_value(true)
-                .help("Set the number of initial columns"),
-        )
-        .get_matches()
 }
 
 fn check_valid_size(m: usize, n: usize) -> Result<()> {
@@ -78,4 +86,17 @@ fn check_valid_size(m: usize, n: usize) -> Result<()> {
         std::process::exit(-1);
     }
     Ok(())
+}
+
+fn get_wall_percentage(matches: &ArgMatches) -> usize {
+    let wall_percentage = matches.value_of("wall_percentage").unwrap_or("15");
+    let wall_percentage = match wall_percentage.parse() {
+        Ok(num @ 0..=100) => num,
+        _ => {
+            eprintln!("The -r parameter must be a positive integer between 0 and 100");
+            std::process::exit(-1);
+        }
+    };
+
+    wall_percentage
 }

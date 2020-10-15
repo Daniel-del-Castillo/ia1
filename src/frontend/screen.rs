@@ -31,7 +31,7 @@ impl FrontEnd {
         queue!(buf, MoveTo(0, size()?.1 - 2))?;
         write!(
             buf,
-            "{0}Rows{1} {0}Columns{1} {2} {3} {4} {5} {6} {7} {8}\n\r",
+            "{0}Rows{1} {0}Columns{1} {2} {3} {4} {5} {6} {7} {8} {9}\n\r",
             "--".negative(),
             "++".negative(),
             if self.state == State::Car {
@@ -55,6 +55,7 @@ impl FrontEnd {
                 "Remove".negative()
             },
             "Clear".negative(),
+            "Random".negative(),
             "Run".negative(),
             "Quit".negative()
         )?;

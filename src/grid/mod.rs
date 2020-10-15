@@ -2,6 +2,7 @@ use crossterm::style::Colorize;
 use std::fmt;
 mod content;
 use content::Content;
+use rand::{thread_rng, Rng};
 
 pub struct Grid {
     grid: Vec<Vec<Content>>,
@@ -121,5 +122,31 @@ impl Grid {
 
     pub fn clear(&mut self) {
         self.grid = vec![vec![Content::Empty; self.grid[0].len()]; self.grid.len()];
+    }
+
+    pub fn fill_random(&mut self, wall_percentage: usize) {
+        assert!(wall_percentage <= 100);
+        self.fill_random_walls(wall_percentage);
+        self.set_random_pos_to(Content::Car);
+        self.set_random_pos_to(Content::Goal);
+    }
+
+    fn fill_random_walls(&mut self, wall_percentage: usize) {
+        let mut rng = thread_rng();
+        for content in self.grid.iter_mut().map(|i| i.iter_mut()).flatten() {
+            if rng.gen_range(1, 101) <= wall_percentage {
+                *content = Content::Wall;
+            } else {
+                *content = Content::Empty;
+            }
+        }
+    }
+
+    fn set_random_pos_to(&mut self, content: Content) {
+        let n_cells = self.m() * self.n();
+        let pos = thread_rng().gen_range(0, n_cells);
+        let y = pos / self.n();
+        let x = pos % self.n();
+        self.grid[y][x] = content;
     }
 }

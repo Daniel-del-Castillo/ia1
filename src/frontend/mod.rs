@@ -21,13 +21,16 @@ enum State {
 pub struct FrontEnd {
     grid: Grid,
     state: State,
+    wall_percentage: usize,
 }
 
 impl FrontEnd {
-    pub fn new(grid: Grid) -> Self {
+    pub fn new(grid: Grid, wall_percentage: usize) -> Self {
+        assert!(wall_percentage <= 100);
         FrontEnd {
             grid,
             state: State::Wall,
+            wall_percentage,
         }
     }
 
