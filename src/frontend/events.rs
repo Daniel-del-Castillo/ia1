@@ -112,7 +112,7 @@ impl FrontEnd {
             self.grid
                 .set_height(min(max(desired_height, 1) as usize, term_height - 4));
             self.draw_screen()?;
-            if poll(Duration::from_millis(100))? {
+            if poll(Duration::from_millis(50))? {
                 if let Event::Mouse(MouseEvent::Up(MouseButton::Left, ..)) = read()? {
                     break;
                 }
@@ -125,9 +125,9 @@ impl FrontEnd {
         loop {
             let desired_width = self.grid.n() as isize + change;
             self.grid
-                .set_width(min(max(desired_width, 1) as usize, term_width - 4));
+                .set_width(min(max(desired_width, 1) as usize, term_width / 2 - 2));
             self.draw_screen()?;
-            if poll(Duration::from_millis(100))? {
+            if poll(Duration::from_millis(50))? {
                 if let Event::Mouse(MouseEvent::Up(MouseButton::Left, ..)) = read()? {
                     break;
                 }
