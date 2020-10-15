@@ -10,7 +10,7 @@ use std::fmt::Write as fmt_write;
 use std::io::{stdout, Write};
 
 impl FrontEnd {
-    pub fn draw_screen(&mut self) -> Result<()> {
+    pub(super) fn draw_screen(&mut self) -> Result<()> {
         let mut buf = String::new();
         queue!(buf, Clear(ClearType::All))?;
         self.draw_grid(&mut buf)?;

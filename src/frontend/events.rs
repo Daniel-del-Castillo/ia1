@@ -30,11 +30,13 @@ const CLEAR_BUTTON_BEGIN: u16 = 42;
 const CLEAR_BUTTON_END: u16 = 46;
 const RANDOM_BUTTON_BEGIN: u16 = 48;
 const RANDOM_BUTTON_END: u16 = 53;
+const RUN_BUTTON_BEGIN: u16 = 55;
+const RUN_BUTTON_END: u16 = 57;
 const QUIT_BUTTON_BEGIN: u16 = 59;
 const QUIT_BUTTON_END: u16 = 62;
 
 impl FrontEnd {
-    pub fn process_event(&mut self) -> Result<()> {
+    pub(super) fn process_event(&mut self) -> Result<()> {
         let term_size = size()?;
         let buttons_y = term_size.1 - 2;
         match read()? {
@@ -110,7 +112,7 @@ impl FrontEnd {
             self.grid
                 .set_height(min(max(desired_height, 1) as usize, term_height - 4));
             self.draw_screen()?;
-            if let true = poll(Duration::from_millis(100))? {
+            if poll(Duration::from_millis(100))? {
                 if let Event::Mouse(MouseEvent::Up(MouseButton::Left, ..)) = read()? {
                     break;
                 }
@@ -125,7 +127,7 @@ impl FrontEnd {
             self.grid
                 .set_width(min(max(desired_width, 1) as usize, term_width - 4));
             self.draw_screen()?;
-            if let true = poll(Duration::from_millis(100))? {
+            if poll(Duration::from_millis(100))? {
                 if let Event::Mouse(MouseEvent::Up(MouseButton::Left, ..)) = read()? {
                     break;
                 }
