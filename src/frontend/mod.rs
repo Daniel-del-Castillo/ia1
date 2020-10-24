@@ -1,6 +1,4 @@
 use crate::Grid;
-mod events;
-mod screen;
 use crossterm::{
     cursor::Hide,
     event::EnableMouseCapture,
@@ -9,6 +7,9 @@ use crossterm::{
     Result,
 };
 use std::io::{stdout, Write};
+mod events;
+mod run_simulation;
+mod screen;
 
 #[derive(PartialEq)]
 enum State {
@@ -22,6 +23,7 @@ pub struct FrontEnd {
     grid: Grid,
     state: State,
     wall_percentage: usize,
+    status_msg: String,
 }
 
 impl FrontEnd {
@@ -31,6 +33,7 @@ impl FrontEnd {
             grid,
             state: State::Wall,
             wall_percentage,
+            status_msg: String::new(),
         }
     }
 

@@ -41,6 +41,7 @@ impl FrontEnd {
         let buttons_y = term_size.1 - 2;
         match read()? {
             Event::Mouse(MouseEvent::Down(MouseButton::Left, x, y, ..)) => {
+                self.status_msg.clear();
                 if self.is_inside_grid((x as usize, y as usize)) {
                     self.set_cell((x as usize, y as usize));
                 } else if y == buttons_y {
@@ -100,6 +101,8 @@ impl FrontEnd {
             self.grid.clear();
         } else if x >= RANDOM_BUTTON_BEGIN && x <= RANDOM_BUTTON_END {
             self.grid.fill_random(self.wall_percentage);
+        } else if x >= RUN_BUTTON_BEGIN && x <= RUN_BUTTON_END {
+            self.run_simulation();
         } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
             quit();
         }

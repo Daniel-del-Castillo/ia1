@@ -63,7 +63,7 @@ impl FrontEnd {
     }
 
     fn draw_status_bar(&mut self, buf: &mut String) -> Result<()> {
-        write!(buf, "")?;
+        write!(buf, "{}", self.status_msg)?;
         Ok(())
     }
 }

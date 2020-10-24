@@ -1,6 +1,7 @@
 use crossterm::style::Colorize;
 use std::fmt;
 mod content;
+mod path_finding;
 use content::Content;
 use rand::{thread_rng, Rng};
 
@@ -47,6 +48,20 @@ impl Grid {
 
     pub fn n(&self) -> usize {
         self.grid[0].len()
+    }
+
+    pub fn has_goal(&self) -> bool {
+        match self.goal {
+            None => false,
+            Some(_) => true,
+        }
+    }
+
+    pub fn has_car(&self) -> bool {
+        match self.car {
+            None => false,
+            Some(_) => true,
+        }
     }
 
     pub fn set_width(&mut self, n: usize) {
@@ -127,8 +142,12 @@ impl Grid {
     pub fn fill_random(&mut self, wall_percentage: usize) {
         assert!(wall_percentage <= 100);
         self.fill_random_walls(wall_percentage);
-        self.set_random_pos_to(Content::Car);
-        self.set_random_pos_to(Content::Goal);
+        let car_pos = self.get_random_pos();
+        self.grid[car_pos.1][car_pos.0] = Content::Car;
+        self.car = Some(car_pos);
+        let goal_pos = self.get_random_pos();
+        self.grid[goal_pos.1][goal_pos.0] = Content::Goal;
+        self.goal = Some(goal_pos);
     }
 
     fn fill_random_walls(&mut self, wall_percentage: usize) {
@@ -142,11 +161,11 @@ impl Grid {
         }
     }
 
-    fn set_random_pos_to(&mut self, content: Content) {
+    fn get_random_pos(&mut self) -> (usize, usize) {
         let n_cells = self.m() * self.n();
         let pos = thread_rng().gen_range(0, n_cells);
         let y = pos / self.n();
         let x = pos % self.n();
-        self.grid[y][x] = content;
+        (x, y)
     }
 }

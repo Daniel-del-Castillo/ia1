@@ -7,6 +7,7 @@ pub enum Content {
     Goal,
     Wall,
     Empty,
+    Trace,
 }
 
 impl fmt::Display for Content {
@@ -16,6 +17,7 @@ impl fmt::Display for Content {
             Content::Goal => write!(f, "[]"),
             Content::Wall => write!(f, "{}", "██".red()),
             Content::Empty => write!(f, "  "),
+            Content::Trace => write!(f, "<>"),
         }
     }
 }
