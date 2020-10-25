@@ -1,46 +1,88 @@
 use super::{Content, Grid};
-use std::cmp::{max, min};
-use std::collections::VecDeque;
+use std::cmp::{max, min, Ordering};
+use std::collections::BinaryHeap;
 
-impl Grid {
-    pub fn clear_path(&mut self) {
-        for cell in self.grid.iter_mut().map(|row| row.iter_mut()).flatten() {
-            if let Content::Trace = cell {
-                *cell = Content::Empty;
-            }
+#[derive(Copy, Clone)]
+struct AStarNode {
+    pos: (usize, usize),
+    predecessor: Option<(usize, usize)>,
+    dist: usize,
+    guessed_dist: f32,
+}
+
+impl Eq for AStarNode {}
+
+impl PartialEq for AStarNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.guessed_dist == other.guessed_dist
+    }
+}
+
+impl Ord for AStarNode {
+    fn cmp(&self, other: &Self) -> Ordering {
+        //this will panic if guessed_dist is NaN. That shouldn't happen and the floating point
+        //is needed to use heuristics like the euclidean distance
+        self.guessed_dist.partial_cmp(&other.guessed_dist).unwrap()
+    }
+}
+
+impl PartialOrd for AStarNode {
+    //The values get flipped so an AStarNode will have more priority if its guessed distance is smaller
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self.guessed_dist.partial_cmp(&other.guessed_dist) {
+            Some(Ordering::Less) => Some(Ordering::Greater),
+            Some(Ordering::Greater) => Some(Ordering::Less),
+            x => x,
         }
     }
+}
 
+impl AStarNode {
+    pub fn new(pos: (usize, usize)) -> Self {
+        AStarNode {
+            pos,
+            predecessor: None,
+            dist: usize::MAX,
+            guessed_dist: f32::MAX,
+        }
+    }
+}
+
+impl Grid {
     pub fn find_path(&mut self) -> bool {
         assert!(self.car.is_some() && self.goal.is_some());
         let car_pos = self.car.unwrap();
         let goal_pos = self.goal.unwrap();
-        let mut queue = VecDeque::new();
-        queue.push_back(car_pos);
 
-        let mut predecessors = vec![vec![None; self.n()]; self.m()];
+        let mut node_grid = Vec::new();
+        for i in 0..self.m() {
+            node_grid.push(Vec::new());
+            for j in 0..self.n() {
+                node_grid[i].push(AStarNode::new((j, i)));
+            }
+        }
 
-        let mut dist_map = vec![vec![std::usize::MAX; self.n()]; self.m()];
-        dist_map[car_pos.1][car_pos.0] = 0;
+        node_grid[car_pos.1][car_pos.0].dist = 0;
+        node_grid[car_pos.1][car_pos.0].dist = get_manhattan_dist(car_pos, goal_pos);
 
-        let mut guessed_dist_map = vec![vec![std::usize::MAX; self.n()]; self.m()];
-        guessed_dist_map[car_pos.1][car_pos.0] = get_manhattan_dist(car_pos, goal_pos);
+        let mut priority_queue = BinaryHeap::new();
+        priority_queue.push(node_grid[car_pos.1][car_pos.0]);
 
-        while !queue.is_empty() {
-            let current_pos = queue.pop_front().unwrap();
-            if current_pos == goal_pos {
-                self.draw_path(predecessors, car_pos, goal_pos);
+        while !priority_queue.is_empty() {
+            let current = priority_queue.pop().unwrap();
+            if current.pos == goal_pos {
+                self.draw_path(node_grid, car_pos, goal_pos);
                 return true;
             }
-
-            for neigh in self.get_neighbours(current_pos) {
-                let dist = dist_map[current_pos.1][current_pos.0] + 1;
-                if dist < dist_map[neigh.1][neigh.0] {
-                    predecessors[neigh.1][neigh.0] = Some(current_pos);
-                    dist_map[neigh.1][neigh.0] = dist;
-                    // guessed_dist_map[neigh.1][neigh.0] =
-                    //     dist_map[neigh.1][neigh.0] + get_manhattan_dist(neigh, goal_pos);
-                    queue.push_back(neigh);
+            for neigh in self.get_neighbours(current.pos) {
+                let dist = node_grid[current.pos.1][current.pos.0].dist + 1;
+                if dist < node_grid[neigh.1][neigh.0].dist {
+                    node_grid[neigh.1][neigh.0].predecessor = Some(current.pos);
+                    node_grid[neigh.1][neigh.0].dist = dist;
+                    node_grid[neigh.1][neigh.0].guessed_dist = node_grid[neigh.1][neigh.0].dist
+                        as f32
+                        + get_manhattan_dist(neigh, goal_pos) as f32;
+                    priority_queue.push(node_grid[neigh.1][neigh.0]);
                 }
             }
         }
@@ -49,13 +91,13 @@ impl Grid {
 
     fn draw_path(
         &mut self,
-        predecessors_map: Vec<Vec<Option<(usize, usize)>>>,
+        node_grid: Vec<Vec<AStarNode>>,
         car_pos: (usize, usize),
         goal_pos: (usize, usize),
     ) {
         let mut current = goal_pos;
         loop {
-            current = predecessors_map[current.1][current.0].unwrap();
+            current = node_grid[current.1][current.0].predecessor.unwrap();
             if current == car_pos {
                 break;
             }
@@ -87,6 +129,14 @@ impl Grid {
                 }
             })
             .collect()
+    }
+
+    pub fn clear_path(&mut self) {
+        for cell in self.grid.iter_mut().map(|row| row.iter_mut()).flatten() {
+            if let Content::Trace = cell {
+                *cell = Content::Empty;
+            }
+        }
     }
 }
 

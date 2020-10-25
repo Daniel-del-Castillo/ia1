@@ -2,6 +2,7 @@ use super::FrontEnd;
 
 impl FrontEnd {
     pub(super) fn run_simulation(&mut self) {
+        self.grid.clear_path();
         if !self.check_valid_state() {
             self.status_msg = String::from("A goal and a car must be in the grid");
             return;
