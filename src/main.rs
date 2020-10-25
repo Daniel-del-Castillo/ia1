@@ -3,7 +3,7 @@ use crossterm::{terminal::size, Result};
 mod grid;
 use grid::Grid;
 mod frontend;
-use frontend::FrontEnd;
+use frontend::{FrontEnd, Heuristic};
 
 fn main() -> Result<()> {
     let matches = get_args_matches();
@@ -11,33 +11,37 @@ fn main() -> Result<()> {
     check_valid_size(m, n)?;
     let grid = Grid::new(m, n);
     let wall_percentage = get_wall_percentage(&matches);
-    let mut frontend = FrontEnd::new(grid, wall_percentage);
+    let heuristic = get_heuristic(&matches);
+    let mut frontend = FrontEnd::new(grid, wall_percentage, heuristic);
     frontend.run()
 }
 
 fn get_args_matches() -> ArgMatches<'static> {
     App::new("ia1")
-        .arg(
+        .args(&[
             Arg::with_name("m")
                 .short("m")
                 .long("rows")
                 .takes_value(true)
                 .help("Set the number of initial rows"),
-        )
-        .arg(
             Arg::with_name("n")
                 .short("n")
                 .long("columns")
                 .takes_value(true)
                 .help("Set the number of initial columns"),
-        )
-        .arg(
             Arg::with_name("wall_percentage")
                 .short("r")
                 .long("random")
                 .takes_value(true)
                 .help("Set the percentage of walls in a random generated map"),
-        )
+            Arg::with_name("euclidean")
+                .long("euclidean")
+                .conflicts_with("manhattan")
+                .help("Uses euclidean distance as the heuristic function"),
+            Arg::with_name("manhattan")
+                .long("manhattan")
+                .help("Uses manhattan distance as the heuristic function. This is the default"),
+        ])
         .get_matches()
 }
 
@@ -99,4 +103,12 @@ fn get_wall_percentage(matches: &ArgMatches) -> usize {
     };
 
     wall_percentage
+}
+
+fn get_heuristic(matches: &ArgMatches) -> Heuristic {
+    if let Some(_) = matches.value_of("euclidean") {
+        Heuristic::Euclidean
+    } else {
+        Heuristic::Manhattan
+    }
 }

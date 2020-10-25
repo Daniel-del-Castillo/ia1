@@ -19,20 +19,28 @@ enum State {
     Remove,
 }
 
+#[derive(PartialEq)]
+pub enum Heuristic {
+    Euclidean,
+    Manhattan,
+}
+
 pub struct FrontEnd {
     grid: Grid,
     state: State,
     wall_percentage: usize,
+    heuristic: Heuristic,
     status_msg: String,
 }
 
 impl FrontEnd {
-    pub fn new(grid: Grid, wall_percentage: usize) -> Self {
+    pub fn new(grid: Grid, wall_percentage: usize, heuristic: Heuristic) -> Self {
         assert!(wall_percentage <= 100);
         FrontEnd {
             grid,
             state: State::Wall,
             wall_percentage,
+            heuristic,
             status_msg: String::new(),
         }
     }

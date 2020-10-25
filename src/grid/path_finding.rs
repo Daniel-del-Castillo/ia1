@@ -1,5 +1,5 @@
 use super::{Content, Grid};
-use std::cmp::{max, min, Ordering};
+use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
 #[derive(Copy, Clone)]
@@ -49,7 +49,7 @@ impl AStarNode {
 }
 
 impl Grid {
-    pub fn find_path(&mut self) -> bool {
+    pub fn find_path(&mut self, heuristic: fn((usize, usize), (usize, usize)) -> f32) -> bool {
         assert!(self.car.is_some() && self.goal.is_some());
         let car_pos = self.car.unwrap();
         let goal_pos = self.goal.unwrap();
@@ -63,7 +63,7 @@ impl Grid {
         }
 
         node_grid[car_pos.1][car_pos.0].dist = 0;
-        node_grid[car_pos.1][car_pos.0].dist = get_manhattan_dist(car_pos, goal_pos);
+        node_grid[car_pos.1][car_pos.0].guessed_dist = heuristic(car_pos, goal_pos);
 
         let mut priority_queue = BinaryHeap::new();
         priority_queue.push(node_grid[car_pos.1][car_pos.0]);
@@ -79,9 +79,8 @@ impl Grid {
                 if dist < node_grid[neigh.1][neigh.0].dist {
                     node_grid[neigh.1][neigh.0].predecessor = Some(current.pos);
                     node_grid[neigh.1][neigh.0].dist = dist;
-                    node_grid[neigh.1][neigh.0].guessed_dist = node_grid[neigh.1][neigh.0].dist
-                        as f32
-                        + get_manhattan_dist(neigh, goal_pos) as f32;
+                    node_grid[neigh.1][neigh.0].guessed_dist =
+                        node_grid[neigh.1][neigh.0].dist as f32 + heuristic(neigh, goal_pos);
                     priority_queue.push(node_grid[neigh.1][neigh.0]);
                 }
             }
@@ -138,8 +137,4 @@ impl Grid {
             }
         }
     }
-}
-
-fn get_manhattan_dist(pos1: (usize, usize), pos2: (usize, usize)) -> usize {
-    max(pos1.0, pos2.0) - min(pos1.0, pos2.0) + max(pos1.1, pos2.1) - min(pos1.1, pos2.1)
 }
