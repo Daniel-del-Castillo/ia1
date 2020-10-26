@@ -1,4 +1,5 @@
-use super::{Content, Grid};
+use super::content::{Content, Direction};
+use super::Grid;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
@@ -96,11 +97,18 @@ impl Grid {
     ) {
         let mut current = goal_pos;
         loop {
+            let prev = current;
             current = node_grid[current.1][current.0].predecessor.unwrap();
             if current == car_pos {
                 break;
             }
-            self.grid[current.1][current.0] = Content::Trace;
+            self.grid[current.1][current.0] = match current {
+                (x, y) if x == prev.0 + 1 && y == prev.1 => Content::Trace(Direction::Left),
+                (x, y) if x + 1 == prev.0 && y == prev.1 => Content::Trace(Direction::Right),
+                (x, y) if x == prev.0 && y == prev.1 + 1 => Content::Trace(Direction::Up),
+                (x, y) if x == prev.0 && y + 1 == prev.1 => Content::Trace(Direction::Down),
+                _ => unreachable!("Corrupted predecessors table"),
+            };
         }
     }
 
@@ -132,7 +140,7 @@ impl Grid {
 
     pub fn clear_path(&mut self) {
         for cell in self.grid.iter_mut().map(|row| row.iter_mut()).flatten() {
-            if let Content::Trace = cell {
+            if let Content::Trace(_) = cell {
                 *cell = Content::Empty;
             }
         }

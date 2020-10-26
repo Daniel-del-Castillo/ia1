@@ -7,7 +7,15 @@ pub enum Content {
     Goal,
     Wall,
     Empty,
-    Trace,
+    Trace(Direction),
+}
+
+#[derive(Clone, Copy)]
+pub enum Direction {
+    Left,
+    Up,
+    Right,
+    Down,
 }
 
 impl fmt::Display for Content {
@@ -17,7 +25,12 @@ impl fmt::Display for Content {
             Content::Goal => write!(f, "[]"),
             Content::Wall => write!(f, "{}", "██".red()),
             Content::Empty => write!(f, "  "),
-            Content::Trace => write!(f, "<>"),
+            Content::Trace(dir) => match dir {
+                Direction::Left => write!(f, "←←"),
+                Direction::Up => write!(f, "↑↑"),
+                Direction::Right => write!(f, "→→"),
+                Direction::Down => write!(f, "↓↓"),
+            },
         }
     }
 }
