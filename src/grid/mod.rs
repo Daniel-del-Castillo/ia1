@@ -71,6 +71,8 @@ impl Grid {
             return;
         } else if n < width {
             self.grid.iter_mut().for_each(|row| row.truncate(n));
+            self.check_car_valididy();
+            self.check_goal_valididy();
         } else {
             self.grid
                 .iter_mut()
@@ -85,6 +87,8 @@ impl Grid {
             return;
         } else if m < height {
             self.grid.truncate(m);
+            self.check_car_valididy();
+            self.check_goal_valididy();
         } else {
             let width = self.grid[0].len();
             (0..m - height).for_each(|_| self.grid.push(vec![Content::Empty; width]));
@@ -141,13 +145,21 @@ impl Grid {
 
     pub fn fill_random(&mut self, wall_percentage: usize) {
         assert!(wall_percentage <= 100);
+        self.car = None;
+        self.goal = None;
         self.fill_random_walls(wall_percentage);
         let car_pos = self.get_random_pos();
-        self.grid[car_pos.1][car_pos.0] = Content::Car;
-        self.car = Some(car_pos);
-        let goal_pos = self.get_random_pos();
-        self.grid[goal_pos.1][goal_pos.0] = Content::Goal;
-        self.goal = Some(goal_pos);
+        self.set_car(car_pos.0, car_pos.1);
+        //if the grid only has one cell we won't place the goal
+        if self.m() * self.n() != 1 {
+            let goal_pos = loop {
+                let pos = self.get_random_pos();
+                if pos != car_pos {
+                    break pos;
+                }
+            };
+            self.set_goal(goal_pos.0, goal_pos.1);
+        }
     }
 
     fn fill_random_walls(&mut self, wall_percentage: usize) {
@@ -167,5 +179,21 @@ impl Grid {
         let y = pos / self.n();
         let x = pos % self.n();
         (x, y)
+    }
+
+    fn check_car_valididy(&mut self) {
+        if let Some(pos) = self.car {
+            if pos.0 >= self.n() || pos.1 >= self.m() {
+                self.car = None;
+            }
+        }
+    }
+
+    fn check_goal_valididy(&mut self) {
+        if let Some(pos) = self.goal {
+            if pos.0 >= self.n() || pos.1 >= self.m() {
+                self.goal = None;
+            }
+        }
     }
 }
