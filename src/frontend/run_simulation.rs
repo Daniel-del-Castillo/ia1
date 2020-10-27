@@ -30,5 +30,5 @@ fn get_manhattan_dist(pos1: (usize, usize), pos2: (usize, usize)) -> f32 {
 fn get_euclidean_dist(pos1: (usize, usize), pos2: (usize, usize)) -> f32 {
     let pos1 = (pos1.0 as f32, pos1.1 as f32);
     let pos2 = (pos2.0 as f32, pos2.1 as f32);
-    ((pos1.0 - pos2.0).exp2() + (pos1.1 - pos2.1).exp2()).sqrt()
+    ((pos1.0 - pos2.0).powi(2) + (pos1.1 - pos2.1).powi(2)).sqrt()
 }
