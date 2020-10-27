@@ -8,13 +8,13 @@ impl FrontEnd {
             self.status_msg = String::from("A goal and a car must be in the grid");
             return;
         }
-        if !self.grid.find_path(match self.heuristic {
+        let heuristic_fn = match self.heuristic {
             Heuristic::Euclidean => get_euclidean_dist,
             Heuristic::Manhattan => get_manhattan_dist,
-        }) {
-            self.status_msg = String::from("Couldn't find a path");
-        } else {
-            self.status_msg = String::from("Path found!");
+        };
+        self.status_msg = match self.grid.find_path(heuristic_fn) {
+            None => String::from("Couldn't find a path"),
+            Some(iteration_count) => format!("Path found! {} cells were explored", iteration_count),
         }
     }
 

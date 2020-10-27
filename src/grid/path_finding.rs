@@ -50,7 +50,10 @@ impl AStarNode {
 }
 
 impl Grid {
-    pub fn find_path(&mut self, heuristic: fn((usize, usize), (usize, usize)) -> f32) -> bool {
+    pub fn find_path(
+        &mut self,
+        heuristic: fn((usize, usize), (usize, usize)) -> f32,
+    ) -> Option<usize> {
         assert!(self.car.is_some() && self.goal.is_some());
         let car_pos = self.car.unwrap();
         let goal_pos = self.goal.unwrap();
@@ -62,18 +65,22 @@ impl Grid {
                 node_grid[i].push(AStarNode::new((j, i)));
             }
         }
-
         node_grid[car_pos.1][car_pos.0].dist = 0;
         node_grid[car_pos.1][car_pos.0].guessed_dist = heuristic(car_pos, goal_pos);
 
         let mut priority_queue = BinaryHeap::new();
         priority_queue.push(node_grid[car_pos.1][car_pos.0]);
+        let mut iteration_count = 0;
 
         while !priority_queue.is_empty() {
+            iteration_count += 1;
             let current = priority_queue.pop().unwrap();
             if current.pos == goal_pos {
                 self.draw_path(node_grid, car_pos, goal_pos);
-                return true;
+                return Some(iteration_count);
+            }
+            if current.pos != car_pos {
+                self.grid[current.pos.1][current.pos.0] = Content::Explored;
             }
             for neigh in self.get_neighbours(current.pos) {
                 let dist = node_grid[current.pos.1][current.pos.0].dist + 1;
@@ -86,7 +93,7 @@ impl Grid {
                 }
             }
         }
-        false
+        None
     }
 
     fn draw_path(
@@ -140,7 +147,7 @@ impl Grid {
 
     pub fn clear_path(&mut self) {
         for cell in self.grid.iter_mut().map(|row| row.iter_mut()).flatten() {
-            if let Content::Trace(_) = cell {
+            if let Content::Trace(_) | Content::Explored = cell {
                 *cell = Content::Empty;
             }
         }
