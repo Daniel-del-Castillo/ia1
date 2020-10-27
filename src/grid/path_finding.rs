@@ -58,13 +58,7 @@ impl Grid {
         let car_pos = self.car.unwrap();
         let goal_pos = self.goal.unwrap();
 
-        let mut node_grid = Vec::new();
-        for i in 0..self.m() {
-            node_grid.push(Vec::new());
-            for j in 0..self.n() {
-                node_grid[i].push(AStarNode::new((j, i)));
-            }
-        }
+        let mut node_grid = self.create_node_grid();
         node_grid[car_pos.1][car_pos.0].dist = 0;
         node_grid[car_pos.1][car_pos.0].guessed_dist = heuristic(car_pos, goal_pos);
 
@@ -82,8 +76,8 @@ impl Grid {
             if current.pos != car_pos {
                 self.grid[current.pos.1][current.pos.0] = Content::Explored;
             }
+            let dist = node_grid[current.pos.1][current.pos.0].dist + 1;
             for neigh in self.get_neighbours(current.pos) {
-                let dist = node_grid[current.pos.1][current.pos.0].dist + 1;
                 if dist < node_grid[neigh.1][neigh.0].dist {
                     node_grid[neigh.1][neigh.0].predecessor = Some(current.pos);
                     node_grid[neigh.1][neigh.0].dist = dist;
@@ -94,6 +88,17 @@ impl Grid {
             }
         }
         None
+    }
+
+    fn create_node_grid(&self) -> Vec<Vec<AStarNode>> {
+        let mut node_grid = Vec::new();
+        for i in 0..self.m() {
+            node_grid.push(Vec::new());
+            for j in 0..self.n() {
+                node_grid[i].push(AStarNode::new((j, i)));
+            }
+        }
+        node_grid
     }
 
     fn draw_path(
