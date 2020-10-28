@@ -23,18 +23,15 @@ impl Ord for AStarNode {
     fn cmp(&self, other: &Self) -> Ordering {
         //this will panic if guessed_dist is NaN. That shouldn't happen and the floating point
         //is needed to use heuristics like the euclidean distance
-        self.guessed_dist.partial_cmp(&other.guessed_dist).unwrap()
+        other.guessed_dist.partial_cmp(&self.guessed_dist).unwrap()
     }
 }
 
 impl PartialOrd for AStarNode {
-    //The values get flipped so an AStarNode will have more priority if its guessed distance is smaller
+    //They get compared in invered order
+    //so an AStarNode will have more priority if its guessed distance is smaller
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match self.guessed_dist.partial_cmp(&other.guessed_dist) {
-            Some(Ordering::Less) => Some(Ordering::Greater),
-            Some(Ordering::Greater) => Some(Ordering::Less),
-            x => x,
-        }
+        other.guessed_dist.partial_cmp(&self.guessed_dist)
     }
 }
 
