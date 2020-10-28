@@ -1,7 +1,6 @@
 use super::content::{Content, Direction};
 use super::Grid;
-use std::cmp::Ordering;
-use std::collections::BinaryHeap;
+use std::collections::VecDeque;
 
 #[derive(Copy, Clone)]
 struct AStarNode {
@@ -9,30 +8,6 @@ struct AStarNode {
     predecessor: Option<(usize, usize)>,
     dist: usize,
     guessed_dist: f32,
-}
-
-impl Eq for AStarNode {}
-
-impl PartialEq for AStarNode {
-    fn eq(&self, other: &Self) -> bool {
-        self.guessed_dist == other.guessed_dist
-    }
-}
-
-impl Ord for AStarNode {
-    fn cmp(&self, other: &Self) -> Ordering {
-        //this will panic if guessed_dist is NaN. That shouldn't happen and the floating point
-        //is needed to use heuristics like the euclidean distance
-        other.guessed_dist.partial_cmp(&self.guessed_dist).unwrap()
-    }
-}
-
-impl PartialOrd for AStarNode {
-    //They get compared in invered order
-    //so an AStarNode will have more priority if its guessed distance is smaller
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        other.guessed_dist.partial_cmp(&self.guessed_dist)
-    }
 }
 
 impl AStarNode {
@@ -59,13 +34,24 @@ impl Grid {
         node_grid[car_pos.1][car_pos.0].dist = 0;
         node_grid[car_pos.1][car_pos.0].guessed_dist = heuristic(car_pos, goal_pos);
 
-        let mut priority_queue = BinaryHeap::new();
-        priority_queue.push(node_grid[car_pos.1][car_pos.0]);
+        let mut priority_queue = VecDeque::new();
+        priority_queue.push_front(node_grid[car_pos.1][car_pos.0]);
         let mut iteration_count = 0;
 
         while !priority_queue.is_empty() {
             iteration_count += 1;
-            let current = priority_queue.pop().unwrap();
+            let index = priority_queue
+                .iter()
+                .enumerate()
+                .fold((0, f32::MAX), |acc, (index, node)| {
+                    if node.guessed_dist < acc.1 {
+                        (index, node.guessed_dist)
+                    } else {
+                        acc
+                    }
+                })
+                .0;
+            let current = priority_queue.remove(index).unwrap();
             if current.pos == goal_pos {
                 self.draw_path(node_grid, car_pos, goal_pos);
                 return Some(iteration_count);
@@ -80,7 +66,7 @@ impl Grid {
                     node_grid[neigh.1][neigh.0].dist = dist;
                     node_grid[neigh.1][neigh.0].guessed_dist =
                         node_grid[neigh.1][neigh.0].dist as f32 + heuristic(neigh, goal_pos);
-                    priority_queue.push(node_grid[neigh.1][neigh.0]);
+                    priority_queue.push_front(node_grid[neigh.1][neigh.0]);
                 }
             }
         }
