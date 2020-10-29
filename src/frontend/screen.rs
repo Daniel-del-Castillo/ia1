@@ -6,31 +6,28 @@ use crossterm::{
     terminal::{size, Clear, ClearType},
     Result,
 };
-use std::fmt::Write as fmt_write;
 use std::io::{stdout, Write};
 
 impl FrontEnd {
     pub(super) fn draw_screen(&mut self) -> Result<()> {
-        let mut buf = String::new();
-        queue!(buf, Clear(ClearType::All))?;
-        self.draw_grid(&mut buf)?;
-        self.draw_buttons(&mut buf)?;
-        self.draw_status_bar(&mut buf)?;
-        write!(stdout(), "{}", buf)?;
+        queue!(stdout(), Clear(ClearType::All))?;
+        self.draw_grid()?;
+        self.draw_buttons()?;
+        self.draw_status_bar()?;
         stdout().flush()?;
         Ok(())
     }
 
-    fn draw_grid(&mut self, buf: &mut String) -> Result<()> {
-        queue!(buf, MoveTo(0, 0))?;
-        write!(buf, "{}", self.grid)?;
+    fn draw_grid(&mut self) -> Result<()> {
+        queue!(stdout(), MoveTo(0, 0))?;
+        write!(stdout(), "{}", self.grid)?;
         Ok(())
     }
 
-    fn draw_buttons(&mut self, buf: &mut String) -> Result<()> {
-        queue!(buf, MoveTo(0, size()?.1 - 2))?;
+    fn draw_buttons(&mut self) -> Result<()> {
+        queue!(stdout(), MoveTo(0, size()?.1 - 2))?;
         write!(
-            buf,
+            stdout(),
             "{0}Rows{1} {0}Columns{1} {2} {3} {4} {5} {6} {7} {8} {9}\n\r",
             "--".negative(),
             "++".negative(),
@@ -62,8 +59,8 @@ impl FrontEnd {
         Ok(())
     }
 
-    fn draw_status_bar(&mut self, buf: &mut String) -> Result<()> {
-        write!(buf, "{}", self.status_msg)?;
+    fn draw_status_bar(&mut self) -> Result<()> {
+        write!(stdout(), "{}", self.status_msg)?;
         Ok(())
     }
 }
