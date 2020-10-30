@@ -1,4 +1,4 @@
-use super::{FrontEnd, State};
+use super::{FrontEnd, Heuristic, State};
 use crossterm::{
     cursor::Show,
     event::{poll, read, DisableMouseCapture, Event, MouseButton, MouseEvent},
@@ -30,10 +30,12 @@ const CLEAR_BUTTON_BEGIN: u16 = 42;
 const CLEAR_BUTTON_END: u16 = 46;
 const RANDOM_BUTTON_BEGIN: u16 = 48;
 const RANDOM_BUTTON_END: u16 = 53;
-const RUN_BUTTON_BEGIN: u16 = 55;
-const RUN_BUTTON_END: u16 = 57;
-const QUIT_BUTTON_BEGIN: u16 = 59;
-const QUIT_BUTTON_END: u16 = 62;
+const HEURISTIC_BUTTON_BEGIN: u16 = 55;
+const HEURISTIC_BUTTON_END: u16 = 63;
+const RUN_BUTTON_BEGIN: u16 = 65;
+const RUN_BUTTON_END: u16 = 67;
+const QUIT_BUTTON_BEGIN: u16 = 69;
+const QUIT_BUTTON_END: u16 = 72;
 
 impl FrontEnd {
     pub(super) fn process_event(&mut self) -> Result<()> {
@@ -101,6 +103,8 @@ impl FrontEnd {
             self.grid.clear();
         } else if x >= RANDOM_BUTTON_BEGIN && x <= RANDOM_BUTTON_END {
             self.grid.fill_random(self.wall_percentage);
+        } else if x >= HEURISTIC_BUTTON_BEGIN && x <= HEURISTIC_BUTTON_END {
+            self.change_heuristic();
         } else if x >= RUN_BUTTON_BEGIN && x <= RUN_BUTTON_END {
             self.run_simulation();
         } else if x >= QUIT_BUTTON_BEGIN && x <= QUIT_BUTTON_END {
@@ -137,6 +141,13 @@ impl FrontEnd {
             }
         }
         Ok(())
+    }
+
+    fn change_heuristic(&mut self) {
+        self.heuristic = match self.heuristic {
+            Heuristic::Euclidean => Heuristic::Manhattan,
+            Heuristic::Manhattan => Heuristic::Euclidean,
+        }
     }
 }
 

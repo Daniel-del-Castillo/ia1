@@ -1,4 +1,4 @@
-use super::{FrontEnd, State};
+use super::{FrontEnd, Heuristic, State};
 use crossterm::{
     cursor::MoveTo,
     queue,
@@ -28,7 +28,7 @@ impl FrontEnd {
         queue!(stdout(), MoveTo(0, size()?.1 - 2))?;
         write!(
             stdout(),
-            "{0}Rows{1} {0}Columns{1} {2} {3} {4} {5} {6} {7} {8} {9}\n\r",
+            "{0}Rows{1} {0}Columns{1} {2} {3} {4} {5} {6} {7} {8} {9} {10}\n\r",
             "--".negative(),
             "++".negative(),
             if self.state == State::Car {
@@ -53,6 +53,10 @@ impl FrontEnd {
             },
             "Clear".negative(),
             "Random".negative(),
+            match self.heuristic {
+                Heuristic::Euclidean => "Euclidean".bold(),
+                Heuristic::Manhattan => "Manhattan".bold(),
+            },
             "Run".negative(),
             "Quit".negative()
         )?;
