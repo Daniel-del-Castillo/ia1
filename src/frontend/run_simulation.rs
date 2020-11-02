@@ -12,9 +12,15 @@ impl FrontEnd {
             Heuristic::Euclidean => get_euclidean_dist,
             Heuristic::Manhattan => get_manhattan_dist,
         };
-        self.status_msg = match self.grid.find_path(heuristic_fn) {
-            None => String::from("Couldn't find a path"),
-            Some(iteration_count) => format!("Path found! {} cells were explored", iteration_count),
+        let path_result = self.grid.find_path(heuristic_fn);
+        match path_result {
+            None => self.status_msg = String::from("Couldn't find a path"),
+            Some(path_result) => {
+                self.status_msg = format!(
+                    "Path with length {} found! {} cells were explored",
+                    path_result.length, path_result.explored
+                );
+            }
         }
     }
 

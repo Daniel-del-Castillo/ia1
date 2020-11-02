@@ -21,11 +21,16 @@ impl AStarNode {
     }
 }
 
+pub struct PathResult {
+    pub explored: usize,
+    pub length: usize,
+}
+
 impl Grid {
     pub fn find_path(
         &mut self,
         heuristic: fn((usize, usize), (usize, usize)) -> f32,
-    ) -> Option<usize> {
+    ) -> Option<PathResult> {
         assert!(self.car.is_some() && self.goal.is_some());
         let car_pos = self.car.unwrap();
         let goal_pos = self.goal.unwrap();
@@ -53,8 +58,12 @@ impl Grid {
                 .0;
             let current = priority_queue.remove(index).unwrap();
             if current.pos == goal_pos {
-                self.draw_path(node_grid, car_pos, goal_pos);
-                return Some(iteration_count);
+                self.draw_path(&node_grid, car_pos, goal_pos);
+                let length = self.get_path_length(&node_grid, car_pos, goal_pos);
+                return Some(PathResult {
+                    explored: iteration_count,
+                    length,
+                });
             }
             if current.pos != car_pos {
                 self.grid[current.pos.1][current.pos.0] = Content::Explored;
@@ -86,15 +95,15 @@ impl Grid {
 
     fn draw_path(
         &mut self,
-        node_grid: Vec<Vec<AStarNode>>,
-        car_pos: (usize, usize),
-        goal_pos: (usize, usize),
+        node_grid: &Vec<Vec<AStarNode>>,
+        start: (usize, usize),
+        end: (usize, usize),
     ) {
-        let mut current = goal_pos;
+        let mut current = end;
         loop {
             let prev = current;
             current = node_grid[current.1][current.0].predecessor.unwrap();
-            if current == car_pos {
+            if current == start {
                 break;
             }
             self.grid[current.1][current.0] = match current {
@@ -104,6 +113,23 @@ impl Grid {
                 (x, y) if x == prev.0 && y + 1 == prev.1 => Content::Trace(Direction::Down),
                 _ => unreachable!("Corrupted predecessors table"),
             };
+        }
+    }
+
+    fn get_path_length(
+        &mut self,
+        node_grid: &Vec<Vec<AStarNode>>,
+        start: (usize, usize),
+        end: (usize, usize),
+    ) -> usize {
+        let mut current = end;
+        let mut lenght = 0;
+        loop {
+            current = node_grid[current.1][current.0].predecessor.unwrap();
+            if current == start {
+                break lenght;
+            }
+            lenght += 1;
         }
     }
 
