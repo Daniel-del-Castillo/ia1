@@ -4,12 +4,12 @@ mod grid;
 use grid::Grid;
 mod frontend;
 use frontend::{FrontEnd, Heuristic};
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 
 fn main() -> Result<()> {
     let matches = get_args_matches();
-    let (m, n) = get_grid_size(&matches);
-    check_valid_size(m, n)?;
-    let grid = Grid::new(m, n);
+    let grid = get_grid(&matches)?;
     let wall_percentage = get_wall_percentage(&matches);
     let heuristic = get_heuristic(&matches);
     let mut frontend = FrontEnd::new(grid, wall_percentage, heuristic);
@@ -41,8 +41,62 @@ fn get_args_matches() -> ArgMatches<'static> {
             Arg::with_name("manhattan")
                 .long("manhattan")
                 .help("Uses manhattan distance as the heuristic function. This is the default"),
+            Arg::with_name("file")
+                .long("file")
+                .short("f")
+                .takes_value(true)
+                .conflicts_with_all(&["m", "n"])
+                .help("Reads a map from the specified file")
+                .long_help(
+                    "Reads a map from the specified file
+                The file must have:
+                -The number of rows in the first row
+                -The number of columns in the second column
+                -A representation of the map using:
+                    -C. as the car
+                    -G. as the goal
+                    -X. as walls
+                    -another character as empty cells",
+                ),
         ])
         .get_matches()
+}
+
+fn get_grid(matches: &ArgMatches) -> Result<Grid> {
+    if let Some(file) = matches.value_of("file") {
+        get_grid_from_file(file)
+    } else {
+        get_grid_from_args(matches)
+    }
+}
+
+fn get_grid_from_file(path: &str) -> Result<Grid> {
+    let file = File::open(path)?;
+    let mut buffer = BufReader::new(file).lines();
+    let m = buffer.next().unwrap()?.parse::<usize>()?;
+    let n = buffer.next().unwrap()?.parse::<usize>()?;
+    check_valid_size(m, n)?;
+    let mut grid = Grid::new(m, n);
+    for i in 0..m {
+        let row = buffer.next().unwrap()?;
+        let mut row_chars = row.chars();
+        for j in 0..n {
+            let c = row_chars.next().unwrap();
+            match c {
+                'C' => grid.set_car(j, i),
+                'G' => grid.set_goal(j, i),
+                'X' => grid.set_wall(j, i),
+                _ => {}
+            }
+        }
+    }
+    Ok(grid)
+}
+
+fn get_grid_from_args(matches: &ArgMatches) -> Result<Grid> {
+    let (m, n) = get_grid_size(&matches);
+    check_valid_size(m, n)?;
+    Ok(Grid::new(m, n))
 }
 
 fn get_grid_size(matches: &ArgMatches) -> (usize, usize) {
