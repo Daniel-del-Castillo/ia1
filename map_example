@@ -1,13 +1,14 @@
 10
 7
-  C  X   X
-X         
-  XXXX XXX
-X         
-    XXXXX 
-   XX     
-X         
-  XXXXXX  
-   X   X X
-  XX  G   
+  C  X 0 You can also add comments to the side after the width has been occupied
+X      1
+  XXXX 2
+X      3
+    XXX4
+   XX  5
+X      6
+  XXX X7
+   X   8
+  XX  G9
+0123456
 Comments can be added after the lines specified as the number of rows
