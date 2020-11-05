@@ -23,7 +23,7 @@ impl fmt::Display for Content {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Content::Car => write!(f, "{}", "🚗".on_black()),
-            Content::Goal => write!(f, "{}", "[]".on_black()),
+            Content::Goal => write!(f, "{}", "🏁".on_black()),
             Content::Wall => write!(f, "{}", "  ".on_red()),
             Content::Empty => write!(f, "{}", "  ".on_black()),
             Content::Explored => write!(f, "{}", "  ".on_yellow()),
