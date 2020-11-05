@@ -37,10 +37,14 @@ fn get_args_matches() -> ArgMatches<'static> {
             Arg::with_name("euclidean")
                 .long("euclidean")
                 .conflicts_with("manhattan")
+                .conflicts_with("chebyshev")
                 .help("Uses euclidean distance as the heuristic function"),
             Arg::with_name("manhattan")
                 .long("manhattan")
                 .help("Uses manhattan distance as the heuristic function. This is the default"),
+            Arg::with_name("chebyshev")
+                .long("chebyshev")
+                .help("Uses chebyshev distance as the heuristic function"),
             Arg::with_name("file")
                 .long("file")
                 .short("f")
@@ -161,8 +165,10 @@ fn get_wall_percentage(matches: &ArgMatches) -> usize {
 
 fn get_heuristic(matches: &ArgMatches) -> Heuristic {
     if let Some(_) = matches.value_of("euclidean") {
-        Heuristic::Euclidean
-    } else {
-        Heuristic::Manhattan
+        return Heuristic::Euclidean;
     }
+    if let Some(_) = matches.value_of("chebyshev") {
+        return Heuristic::Chebyshev;
+    }
+    Heuristic::Manhattan
 }

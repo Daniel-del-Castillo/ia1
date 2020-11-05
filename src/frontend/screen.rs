@@ -56,6 +56,7 @@ impl FrontEnd {
             match self.heuristic {
                 Heuristic::Euclidean => "Euclidean".bold(),
                 Heuristic::Manhattan => "Manhattan".bold(),
+                Heuristic::Chebyshev => "Chebyshev".bold(),
             },
             "Run".negative(),
             "Quit".negative()

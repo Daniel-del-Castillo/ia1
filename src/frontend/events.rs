@@ -145,8 +145,9 @@ impl FrontEnd {
 
     fn change_heuristic(&mut self) {
         self.heuristic = match self.heuristic {
-            Heuristic::Euclidean => Heuristic::Manhattan,
             Heuristic::Manhattan => Heuristic::Euclidean,
+            Heuristic::Euclidean => Heuristic::Chebyshev,
+            Heuristic::Chebyshev => Heuristic::Manhattan,
         }
     }
 }

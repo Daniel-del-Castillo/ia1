@@ -23,6 +23,7 @@ enum State {
 pub enum Heuristic {
     Euclidean,
     Manhattan,
+    Chebyshev,
 }
 
 pub struct FrontEnd {
