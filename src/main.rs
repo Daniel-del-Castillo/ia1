@@ -164,10 +164,10 @@ fn get_wall_percentage(matches: &ArgMatches) -> usize {
 }
 
 fn get_heuristic(matches: &ArgMatches) -> Heuristic {
-    if let Some(_) = matches.value_of("euclidean") {
+    if matches.is_present("euclidean") {
         return Heuristic::Euclidean;
     }
-    if let Some(_) = matches.value_of("chebyshev") {
+    if matches.is_present("chebyshev") {
         return Heuristic::Chebyshev;
     }
     Heuristic::Manhattan
