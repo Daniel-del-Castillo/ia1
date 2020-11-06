@@ -20,7 +20,18 @@ impl FrontEnd {
 
     fn draw_grid(&mut self) -> Result<()> {
         queue!(stdout(), MoveTo(0, 0))?;
-        write!(stdout(), "{}", self.grid)?;
+        if self.compatibility_mode {
+            write!(
+                stdout(),
+                "{}",
+                self.grid
+                    .to_string()
+                    .replace("🚗", "CC")
+                    .replace("🏁", "GG")
+            )?;
+        } else {
+            write!(stdout(), "{}", self.grid)?;
+        }
         Ok(())
     }
 

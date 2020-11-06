@@ -13,6 +13,9 @@ fn main() -> Result<()> {
     let wall_percentage = get_wall_percentage(&matches);
     let heuristic = get_heuristic(&matches);
     let mut frontend = FrontEnd::new(grid, wall_percentage, heuristic);
+    if matches.is_present("compat") {
+        frontend.use_compatibility_mode();
+    }
     frontend.run()
 }
 
@@ -45,6 +48,9 @@ fn get_args_matches() -> ArgMatches<'static> {
             Arg::with_name("chebyshev")
                 .long("chebyshev")
                 .help("Uses chebyshev distance as the heuristic function"),
+            Arg::with_name("compat")
+                .long("compat")
+                .help("Uses a compatibility mode. Use this option if you can't see the car or the goal flag correctly"),
             Arg::with_name("file")
                 .long("file")
                 .short("f")

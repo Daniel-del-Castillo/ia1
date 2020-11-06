@@ -32,6 +32,7 @@ pub struct FrontEnd {
     wall_percentage: usize,
     heuristic: Heuristic,
     status_msg: String,
+    compatibility_mode: bool,
 }
 
 impl FrontEnd {
@@ -43,6 +44,7 @@ impl FrontEnd {
             wall_percentage,
             heuristic,
             status_msg: String::new(),
+            compatibility_mode: false,
         }
     }
 
@@ -53,5 +55,9 @@ impl FrontEnd {
             self.draw_screen()?;
             self.process_event()?;
         }
+    }
+
+    pub fn use_compatibility_mode(&mut self) {
+        self.compatibility_mode = true;
     }
 }
