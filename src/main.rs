@@ -26,17 +26,17 @@ fn get_args_matches() -> ArgMatches<'static> {
                 .short("m")
                 .long("rows")
                 .takes_value(true)
-                .help("Set the number of initial rows"),
+                .help("Sets the number of initial rows"),
             Arg::with_name("n")
                 .short("n")
                 .long("columns")
                 .takes_value(true)
-                .help("Set the number of initial columns"),
+                .help("Sets the number of initial columns"),
             Arg::with_name("wall_percentage")
                 .short("r")
                 .long("random")
                 .takes_value(true)
-                .help("Set the percentage of walls in a random generated map"),
+                .help("Sets the percentage of walls in a random generated map"),
             Arg::with_name("euclidean")
                 .long("euclidean")
                 .conflicts_with("manhattan")
