@@ -1,5 +1,6 @@
 use super::{FrontEnd, Heuristic};
 use std::cmp::{max, min};
+use std::time::Instant;
 
 impl FrontEnd {
     pub(super) fn run_simulation(&mut self) {
@@ -13,13 +14,16 @@ impl FrontEnd {
             Heuristic::Manhattan => get_manhattan_dist,
             Heuristic::Chebyshev => get_chebyshev_dist,
         };
+        let time = Instant::now();
         let path_result = self.grid.find_path(heuristic_fn);
+        let time_used = time.elapsed();
         match path_result {
             None => self.status_msg = String::from("Couldn't find a path"),
             Some(path_result) => {
-                self.status_msg = format!(
-                    "Path with length {} found! {} cells were explored",
-                    path_result.length, path_result.explored
+                self.status_msg =
+                    format!(
+                    "Path with length {} found! {} cells were explored. Approximate time used: {} μs",
+                    path_result.length, path_result.explored, time_used.as_micros()
                 );
             }
         }
