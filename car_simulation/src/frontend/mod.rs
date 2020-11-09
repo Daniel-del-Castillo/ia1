@@ -1,4 +1,3 @@
-use crate::Grid;
 use crossterm::{
     cursor::Hide,
     event::EnableMouseCapture,
@@ -6,6 +5,7 @@ use crossterm::{
     terminal::{enable_raw_mode, EnterAlternateScreen},
     Result,
 };
+use grid::Grid;
 use std::io::{stdout, Write};
 mod events;
 mod run_simulation;

@@ -1,12 +1,3 @@
-[package]
-name = "ia1"
-version = "0.1.0"
-authors = ["CastilloDel <delcastillodelarosadaniel@gmail.com>"]
-edition = "2018"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-crossterm = "0.18.0"
-clap = "2.33.3"
-rand = "0.7.3"
+members = ["car_simulation", "grid"]

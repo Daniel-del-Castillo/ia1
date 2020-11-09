@@ -1,6 +1,5 @@
 use clap::{App, Arg, ArgMatches};
 use crossterm::{terminal::size, Result};
-mod grid;
 use grid::Grid;
 mod frontend;
 use frontend::{FrontEnd, Heuristic};
