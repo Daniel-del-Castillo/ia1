@@ -10,4 +10,3 @@ edition = "2018"
 grid = { path = "../grid"}
 crossterm = "0.18.0"
 clap = "2.33.3"
-rand = "0.7.3"

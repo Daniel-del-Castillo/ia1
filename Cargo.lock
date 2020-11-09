@@ -21,6 +21,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "benchmarks"
+version = "0.1.0"
+dependencies = [
+ "grid",
+]
+
+[[package]]
 name = "bitflags"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -33,7 +40,6 @@ dependencies = [
  "clap",
  "crossterm",
  "grid",
- "rand",
 ]
 
 [[package]]
