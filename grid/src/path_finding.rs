@@ -33,8 +33,10 @@ impl Default for &AStarNode {
 }
 
 pub struct PathResult {
-    pub explored: usize,
-    pub length: usize,
+    explored: usize,
+    node_map: HashMap<(usize, usize), AStarNode>,
+    start: (usize, usize),
+    end: (usize, usize),
 }
 
 impl Grid {
@@ -78,10 +80,11 @@ impl Grid {
             let current = node_map[&current];
             if current.pos == goal_pos {
                 self.draw_path(&node_map, car_pos, goal_pos);
-                let length = self.get_path_length(&node_map, car_pos, goal_pos);
                 return Some(PathResult {
                     explored: iteration_count,
-                    length,
+                    node_map,
+                    start: car_pos,
+                    end: goal_pos,
                 });
             }
             if current.pos != car_pos {
@@ -106,14 +109,14 @@ impl Grid {
 
     fn draw_path(
         &mut self,
-        node_grid: &HashMap<(usize, usize), AStarNode>,
+        node_map: &HashMap<(usize, usize), AStarNode>,
         start: (usize, usize),
         end: (usize, usize),
     ) {
         let mut current = end;
         loop {
             let prev = current;
-            current = node_grid[&current].predecessor.unwrap();
+            current = node_map[&current].predecessor.unwrap();
             if current == start {
                 break;
             }
@@ -124,23 +127,6 @@ impl Grid {
                 (x, y) if x == prev.0 && y + 1 == prev.1 => Content::Trace(Direction::Down),
                 _ => unreachable!("Corrupted predecessors table"),
             };
-        }
-    }
-
-    fn get_path_length(
-        &mut self,
-        node_grid: &HashMap<(usize, usize), AStarNode>,
-        start: (usize, usize),
-        end: (usize, usize),
-    ) -> usize {
-        let mut current = end;
-        let mut lenght = 0;
-        loop {
-            current = node_grid[&current].predecessor.unwrap();
-            if current == start {
-                break lenght;
-            }
-            lenght += 1;
         }
     }
 
@@ -176,5 +162,23 @@ impl Grid {
                 *cell = Content::Empty;
             }
         }
+    }
+}
+
+impl PathResult {
+    pub fn get_path_length(self) -> usize {
+        let mut current = self.end;
+        let mut lenght = 0;
+        loop {
+            current = self.node_map[&current].predecessor.unwrap();
+            if current == self.start {
+                break lenght;
+            }
+            lenght += 1;
+        }
+    }
+
+    pub fn get_n_explored(&self) -> usize {
+        self.explored
     }
 }

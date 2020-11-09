@@ -22,8 +22,8 @@ impl FrontEnd {
             Some(path_result) => {
                 self.status_msg =
                     format!(
-                    "Path with length {} found! {} cells were explored. Approximate time used: {} μs",
-                    path_result.length, path_result.explored, time_used.as_micros()
+                    "Path with length {1} found! {0} cells were explored. Approximate time used: {2} μs",
+                    path_result.get_n_explored(), path_result.get_path_length(), time_used.as_micros()
                 );
             }
         }
