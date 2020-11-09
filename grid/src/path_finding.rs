@@ -41,6 +41,24 @@ pub struct PathResult {
     end: (usize, usize),
 }
 
+impl PathResult {
+    pub fn get_path_length(self) -> usize {
+        let mut current = self.end;
+        let mut lenght = 0;
+        loop {
+            current = self.node_map[&current].predecessor.unwrap();
+            if current == self.start {
+                break lenght;
+            }
+            lenght += 1;
+        }
+    }
+
+    pub fn get_n_explored(&self) -> usize {
+        self.explored
+    }
+}
+
 impl Grid {
     pub fn find_path(
         &mut self,
@@ -164,23 +182,5 @@ impl Grid {
                 *cell = Content::Empty;
             }
         }
-    }
-}
-
-impl PathResult {
-    pub fn get_path_length(self) -> usize {
-        let mut current = self.end;
-        let mut lenght = 0;
-        loop {
-            current = self.node_map[&current].predecessor.unwrap();
-            if current == self.start {
-                break lenght;
-            }
-            lenght += 1;
-        }
-    }
-
-    pub fn get_n_explored(&self) -> usize {
-        self.explored
     }
 }
