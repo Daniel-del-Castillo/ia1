@@ -1,6 +1,6 @@
 use super::content::{Content, Direction};
 use super::Grid;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 #[derive(Copy, Clone)]
 struct AStarNode {
@@ -10,10 +10,21 @@ struct AStarNode {
     guessed_dist: f32,
 }
 
-impl AStarNode {
-    pub fn new(pos: (usize, usize)) -> Self {
+impl Default for AStarNode {
+    fn default() -> Self {
         AStarNode {
-            pos,
+            pos: (0, 0),
+            predecessor: None,
+            dist: usize::MAX,
+            guessed_dist: f32::MAX,
+        }
+    }
+}
+
+impl Default for &AStarNode {
+    fn default() -> Self {
+        &AStarNode {
+            pos: (0, 0),
             predecessor: None,
             dist: usize::MAX,
             guessed_dist: f32::MAX,
@@ -35,9 +46,16 @@ impl Grid {
         let car_pos = self.car.unwrap();
         let goal_pos = self.goal.unwrap();
 
-        let mut node_grid = self.create_node_grid();
-        node_grid[car_pos.1][car_pos.0].dist = 0;
-        node_grid[car_pos.1][car_pos.0].guessed_dist = heuristic(car_pos, goal_pos);
+        let mut node_map = HashMap::new();
+        node_map.insert(
+            car_pos,
+            AStarNode {
+                pos: car_pos,
+                predecessor: None,
+                dist: 0,
+                guessed_dist: heuristic(car_pos, goal_pos),
+            },
+        );
 
         let mut priority_queue = VecDeque::new();
         priority_queue.push_front(car_pos);
@@ -49,18 +67,18 @@ impl Grid {
                 .iter()
                 .enumerate()
                 .fold((0, f32::MAX), |acc, (index, node)| {
-                    if node_grid[node.1][node.0].guessed_dist < acc.1 {
-                        (index, node_grid[node.1][node.0].guessed_dist)
+                    if node_map[node].guessed_dist < acc.1 {
+                        (index, node_map[node].guessed_dist)
                     } else {
                         acc
                     }
                 })
                 .0;
             let current = priority_queue.remove(index).unwrap();
-            let current = node_grid[current.1][current.0];
+            let current = node_map[&current];
             if current.pos == goal_pos {
-                self.draw_path(&node_grid, car_pos, goal_pos);
-                let length = self.get_path_length(&node_grid, car_pos, goal_pos);
+                self.draw_path(&node_map, car_pos, goal_pos);
+                let length = self.get_path_length(&node_map, car_pos, goal_pos);
                 return Some(PathResult {
                     explored: iteration_count,
                     length,
@@ -69,15 +87,16 @@ impl Grid {
             if current.pos != car_pos {
                 self.grid[current.pos.1][current.pos.0] = Content::Explored;
             }
-            let dist = node_grid[current.pos.1][current.pos.0].dist + 1;
-            for neigh in self.get_neighbours(current.pos) {
-                if dist < node_grid[neigh.1][neigh.0].dist {
-                    node_grid[neigh.1][neigh.0].predecessor = Some(current.pos);
-                    node_grid[neigh.1][neigh.0].dist = dist;
-                    node_grid[neigh.1][neigh.0].guessed_dist =
-                        node_grid[neigh.1][neigh.0].dist as f32 + heuristic(neigh, goal_pos);
-                    if !priority_queue.contains(&neigh) {
-                        priority_queue.push_front(neigh);
+            let dist = node_map[&current.pos].dist + 1;
+            for neigh_pos in self.get_neighbours(current.pos) {
+                if dist < node_map.get(&neigh_pos).unwrap_or_default().dist {
+                    let neigh_node = node_map.entry(neigh_pos).or_default();
+                    neigh_node.pos = neigh_pos;
+                    neigh_node.predecessor = Some(current.pos);
+                    neigh_node.dist = dist;
+                    neigh_node.guessed_dist = dist as f32 + heuristic(neigh_pos, goal_pos);
+                    if !priority_queue.contains(&neigh_pos) {
+                        priority_queue.push_front(neigh_pos);
                     }
                 }
             }
@@ -85,27 +104,16 @@ impl Grid {
         None
     }
 
-    fn create_node_grid(&self) -> Vec<Vec<AStarNode>> {
-        let mut node_grid = Vec::new();
-        for i in 0..self.m() {
-            node_grid.push(Vec::new());
-            for j in 0..self.n() {
-                node_grid[i].push(AStarNode::new((j, i)));
-            }
-        }
-        node_grid
-    }
-
     fn draw_path(
         &mut self,
-        node_grid: &Vec<Vec<AStarNode>>,
+        node_grid: &HashMap<(usize, usize), AStarNode>,
         start: (usize, usize),
         end: (usize, usize),
     ) {
         let mut current = end;
         loop {
             let prev = current;
-            current = node_grid[current.1][current.0].predecessor.unwrap();
+            current = node_grid[&current].predecessor.unwrap();
             if current == start {
                 break;
             }
@@ -121,14 +129,14 @@ impl Grid {
 
     fn get_path_length(
         &mut self,
-        node_grid: &Vec<Vec<AStarNode>>,
+        node_grid: &HashMap<(usize, usize), AStarNode>,
         start: (usize, usize),
         end: (usize, usize),
     ) -> usize {
         let mut current = end;
         let mut lenght = 0;
         loop {
-            current = node_grid[current.1][current.0].predecessor.unwrap();
+            current = node_grid[&current].predecessor.unwrap();
             if current == start {
                 break lenght;
             }
