@@ -40,7 +40,7 @@ impl Grid {
         node_grid[car_pos.1][car_pos.0].guessed_dist = heuristic(car_pos, goal_pos);
 
         let mut priority_queue = VecDeque::new();
-        priority_queue.push_front(node_grid[car_pos.1][car_pos.0]);
+        priority_queue.push_front(car_pos);
         let mut iteration_count = 0;
 
         while !priority_queue.is_empty() {
@@ -49,14 +49,15 @@ impl Grid {
                 .iter()
                 .enumerate()
                 .fold((0, f32::MAX), |acc, (index, node)| {
-                    if node.guessed_dist < acc.1 {
-                        (index, node.guessed_dist)
+                    if node_grid[node.1][node.0].guessed_dist < acc.1 {
+                        (index, node_grid[node.1][node.0].guessed_dist)
                     } else {
                         acc
                     }
                 })
                 .0;
             let current = priority_queue.remove(index).unwrap();
+            let current = node_grid[current.1][current.0];
             if current.pos == goal_pos {
                 self.draw_path(&node_grid, car_pos, goal_pos);
                 let length = self.get_path_length(&node_grid, car_pos, goal_pos);
@@ -75,7 +76,9 @@ impl Grid {
                     node_grid[neigh.1][neigh.0].dist = dist;
                     node_grid[neigh.1][neigh.0].guessed_dist =
                         node_grid[neigh.1][neigh.0].dist as f32 + heuristic(neigh, goal_pos);
-                    priority_queue.push_front(node_grid[neigh.1][neigh.0]);
+                    if !priority_queue.contains(&neigh) {
+                        priority_queue.push_front(neigh);
+                    }
                 }
             }
         }
