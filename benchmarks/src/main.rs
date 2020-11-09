@@ -9,23 +9,23 @@ fn main() {
     println!(
         "{: <10} {: >10}μs {: >10}μs {: >10}μs",
         "Manhattan",
-        get_average_duration(200, 200, 15, get_manhattan_dist, 200),
-        get_average_duration(100, 100, 15, get_manhattan_dist, 200),
-        get_average_duration(50, 50, 15, get_manhattan_dist, 200),
+        get_average_duration(200, 200, 15, get_manhattan_dist, 500),
+        get_average_duration(100, 100, 15, get_manhattan_dist, 500),
+        get_average_duration(50, 50, 15, get_manhattan_dist, 500),
     );
     println!(
         "{: <10} {: >10}μs {: >10}μs {: >10}μs",
         "Euclidean",
-        get_average_duration(200, 200, 15, get_euclidean_dist, 200),
-        get_average_duration(100, 100, 15, get_euclidean_dist, 200),
-        get_average_duration(50, 50, 15, get_euclidean_dist, 200),
+        get_average_duration(200, 200, 15, get_euclidean_dist, 500),
+        get_average_duration(100, 100, 15, get_euclidean_dist, 500),
+        get_average_duration(50, 50, 15, get_euclidean_dist, 500),
     );
     println!(
         "{: <10} {: >10}μs {: >10}μs {: >10}μs",
         "Chebyshev",
-        get_average_duration(200, 200, 15, get_chebyshev_dist, 200),
-        get_average_duration(100, 100, 15, get_chebyshev_dist, 200),
-        get_average_duration(50, 50, 15, get_chebyshev_dist, 200),
+        get_average_duration(200, 200, 15, get_chebyshev_dist, 500),
+        get_average_duration(100, 100, 15, get_chebyshev_dist, 500),
+        get_average_duration(50, 50, 15, get_chebyshev_dist, 500),
     );
 }
 
