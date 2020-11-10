@@ -1,7 +1,8 @@
 use super::content::{Content, Direction};
 use super::Grid;
 use fxhash::FxHashMap;
-use std::collections::VecDeque;
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 
 #[derive(Copy, Clone)]
 struct AStarNode {
@@ -9,6 +10,7 @@ struct AStarNode {
     predecessor: Option<(usize, usize)>,
     dist: usize,
     guessed_dist: f32,
+    depth: usize,
 }
 
 impl Default for AStarNode {
@@ -18,6 +20,7 @@ impl Default for AStarNode {
             predecessor: None,
             dist: usize::MAX,
             guessed_dist: f32::MAX,
+            depth: 0,
         }
     }
 }
@@ -29,6 +32,41 @@ impl Default for &AStarNode {
             predecessor: None,
             dist: usize::MAX,
             guessed_dist: f32::MAX,
+            depth: 0,
+        }
+    }
+}
+
+impl Eq for AStarNode {}
+
+impl PartialEq for AStarNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.guessed_dist == other.guessed_dist && self.depth == other.depth
+    }
+}
+
+impl Ord for AStarNode {
+    fn cmp(&self, other: &Self) -> Ordering {
+        //this will panic if guessed_dist is NaN. That shouldn't happen and the floating point
+        //is needed to use heuristics like the euclidean distance
+        other.guessed_dist.partial_cmp(&self.guessed_dist).unwrap()
+    }
+}
+
+impl PartialOrd for AStarNode {
+    //They get compared in inversed order
+    //so an AStarNode will have more priority if its guessed distance is smaller
+    //if equal the node with the higher depth will be the smaller
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match other.guessed_dist.partial_cmp(&self.guessed_dist) {
+            Some(Ordering::Equal) => {
+                if other.depth < self.depth {
+                    Some(Ordering::Greater)
+                } else {
+                    Some(Ordering::Less)
+                }
+            }
+            x => x,
         }
     }
 }
@@ -75,28 +113,18 @@ impl Grid {
                 predecessor: None,
                 dist: 0,
                 guessed_dist: heuristic(car_pos, goal_pos),
+                depth: 0,
             },
         );
 
-        let mut priority_queue = VecDeque::new();
-        priority_queue.push_front(car_pos);
+        let mut priority_queue = BinaryHeap::new();
+        priority_queue.push(node_map[&car_pos]);
         let mut iteration_count = 0;
 
         while !priority_queue.is_empty() {
             iteration_count += 1;
-            let index = priority_queue
-                .iter()
-                .enumerate()
-                .fold((0, f32::MAX), |acc, (index, node)| {
-                    if node_map[node].guessed_dist < acc.1 {
-                        (index, node_map[node].guessed_dist)
-                    } else {
-                        acc
-                    }
-                })
-                .0;
-            let current = priority_queue.remove(index).unwrap();
-            let current = node_map[&current];
+            let current = priority_queue.pop().unwrap();
+            let current = node_map[&current.pos];
             if current.pos == goal_pos {
                 self.draw_path(&node_map, car_pos, goal_pos);
                 return Some(PathResult {
@@ -109,7 +137,7 @@ impl Grid {
             if current.pos != car_pos {
                 self.grid[current.pos.1][current.pos.0] = Content::Explored;
             }
-            let dist = node_map[&current.pos].dist + 1;
+            let dist = current.dist + 1;
             for neigh_pos in self.get_neighbours(current.pos) {
                 if dist < node_map.get(&neigh_pos).unwrap_or_default().dist {
                     let neigh_node = node_map.entry(neigh_pos).or_default();
@@ -117,9 +145,8 @@ impl Grid {
                     neigh_node.predecessor = Some(current.pos);
                     neigh_node.dist = dist;
                     neigh_node.guessed_dist = dist as f32 + heuristic(neigh_pos, goal_pos);
-                    if !priority_queue.contains(&neigh_pos) {
-                        priority_queue.push_front(neigh_pos);
-                    }
+                    neigh_node.depth = current.depth + 1;
+                    priority_queue.push(neigh_node.clone());
                 }
             }
         }
