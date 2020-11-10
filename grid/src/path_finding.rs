@@ -1,8 +1,7 @@
 use super::content::{Content, Direction};
 use super::Grid;
-use hashers::fx_hash::FxHasher;
-use std::collections::{HashMap, VecDeque};
-use std::hash::BuildHasherDefault;
+use fxhash::FxHashMap;
+use std::collections::VecDeque;
 
 #[derive(Copy, Clone)]
 struct AStarNode {
@@ -36,7 +35,7 @@ impl Default for &AStarNode {
 
 pub struct PathResult {
     explored: usize,
-    node_map: HashMap<(usize, usize), AStarNode, BuildHasherDefault<FxHasher>>,
+    node_map: FxHashMap<(usize, usize), AStarNode>,
     start: (usize, usize),
     end: (usize, usize),
 }
@@ -68,7 +67,7 @@ impl Grid {
         let car_pos = self.car.unwrap();
         let goal_pos = self.goal.unwrap();
 
-        let mut node_map = HashMap::with_hasher(BuildHasherDefault::<FxHasher>::default());
+        let mut node_map = FxHashMap::default();
         node_map.insert(
             car_pos,
             AStarNode {
@@ -129,7 +128,7 @@ impl Grid {
 
     fn draw_path(
         &mut self,
-        node_map: &HashMap<(usize, usize), AStarNode, BuildHasherDefault<FxHasher>>,
+        node_map: &FxHashMap<(usize, usize), AStarNode>,
         start: (usize, usize),
         end: (usize, usize),
     ) {

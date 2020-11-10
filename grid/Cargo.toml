@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 rand = "0.7.3"
 crossterm = "0.18.0"
-hashers = "1.0.1"
+fxhash = "0.2.1"

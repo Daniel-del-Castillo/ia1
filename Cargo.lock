@@ -134,17 +134,8 @@ name = "grid"
 version = "0.1.0"
 dependencies = [
  "crossterm",
- "hashers",
- "rand",
-]
-
-[[package]]
-name = "hashers"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2bca93b15ea5a746f220e56587f71e73c6165eab783df9e26590069953e3c30"
-dependencies = [
  "fxhash",
+ "rand",
 ]
 
 [[package]]
