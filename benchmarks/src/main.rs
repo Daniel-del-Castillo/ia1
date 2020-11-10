@@ -3,7 +3,7 @@ use std::cmp::{max, min};
 use std::time::Instant;
 fn main() {
     println!(
-        "{: <10} {: >10}   {: >10}   {: >10}",
+        "{: <10} {: >12} {: >12} {: >12}",
         "Benchmark", "200x200", "100x100", "50x50"
     );
     println!(
