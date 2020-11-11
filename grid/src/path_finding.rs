@@ -126,7 +126,6 @@ impl Grid {
         while !priority_queue.is_empty() {
             iteration_count += 1;
             let current = priority_queue.pop().unwrap();
-            let current = node_map[&current.pos];
             if current.pos == goal_pos {
                 self.draw_path(&node_map, car_pos, goal_pos);
                 return Some(PathResult {
