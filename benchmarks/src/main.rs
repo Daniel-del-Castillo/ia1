@@ -2,30 +2,83 @@ use grid::Grid;
 use std::cmp::{max, min};
 use std::time::Instant;
 fn main() {
+    println!("Benchmark");
     println!(
         "{: <10} {: >12} {: >12} {: >12}",
-        "Benchmark", "200x200", "100x100", "50x50"
+        "15%", "200x200", "100x100", "50x50"
     );
     println!(
         "{: <10} {: >10}μs {: >10}μs {: >10}μs",
         "Manhattan",
-        get_average_duration(200, 200, 15, get_manhattan_dist, 500),
-        get_average_duration(100, 100, 15, get_manhattan_dist, 500),
-        get_average_duration(50, 50, 15, get_manhattan_dist, 500),
+        get_average_duration(200, 200, 15, get_manhattan_dist, 5000),
+        get_average_duration(100, 100, 15, get_manhattan_dist, 5000),
+        get_average_duration(50, 50, 15, get_manhattan_dist, 5000),
     );
     println!(
         "{: <10} {: >10}μs {: >10}μs {: >10}μs",
         "Euclidean",
-        get_average_duration(200, 200, 15, get_euclidean_dist, 500),
-        get_average_duration(100, 100, 15, get_euclidean_dist, 500),
-        get_average_duration(50, 50, 15, get_euclidean_dist, 500),
+        get_average_duration(200, 200, 15, get_euclidean_dist, 5000),
+        get_average_duration(100, 100, 15, get_euclidean_dist, 5000),
+        get_average_duration(50, 50, 15, get_euclidean_dist, 5000),
     );
     println!(
         "{: <10} {: >10}μs {: >10}μs {: >10}μs",
         "Chebyshev",
-        get_average_duration(200, 200, 15, get_chebyshev_dist, 500),
-        get_average_duration(100, 100, 15, get_chebyshev_dist, 500),
-        get_average_duration(50, 50, 15, get_chebyshev_dist, 500),
+        get_average_duration(200, 200, 15, get_chebyshev_dist, 5000),
+        get_average_duration(100, 100, 15, get_chebyshev_dist, 5000),
+        get_average_duration(50, 50, 15, get_chebyshev_dist, 5000),
+    );
+    println!("");
+    println!(
+        "{: <10} {: >12} {: >12} {: >12}",
+        "25%", "200x200", "100x100", "50x50"
+    );
+    println!(
+        "{: <10} {: >10}μs {: >10}μs {: >10}μs",
+        "Manhattan",
+        get_average_duration(200, 200, 25, get_manhattan_dist, 5000),
+        get_average_duration(100, 100, 25, get_manhattan_dist, 5000),
+        get_average_duration(50, 50, 25, get_manhattan_dist, 5000),
+    );
+    println!(
+        "{: <10} {: >10}μs {: >10}μs {: >10}μs",
+        "Euclidean",
+        get_average_duration(200, 200, 25, get_euclidean_dist, 5000),
+        get_average_duration(100, 100, 25, get_euclidean_dist, 5000),
+        get_average_duration(50, 50, 25, get_euclidean_dist, 5000),
+    );
+    println!(
+        "{: <10} {: >10}μs {: >10}μs {: >10}μs",
+        "Chebyshev",
+        get_average_duration(200, 200, 25, get_chebyshev_dist, 5000),
+        get_average_duration(100, 100, 25, get_chebyshev_dist, 5000),
+        get_average_duration(50, 50, 25, get_chebyshev_dist, 5000),
+    );
+    println!("");
+    println!(
+        "{: <10} {: >12} {: >12} {: >12}",
+        "35%", "200x200", "100x100", "50x50"
+    );
+    println!(
+        "{: <10} {: >10}μs {: >10}μs {: >10}μs",
+        "Manhattan",
+        get_average_duration(200, 200, 35, get_manhattan_dist, 500),
+        get_average_duration(100, 100, 35, get_manhattan_dist, 500),
+        get_average_duration(50, 50, 35, get_manhattan_dist, 500),
+    );
+    println!(
+        "{: <10} {: >10}μs {: >10}μs {: >10}μs",
+        "Euclidean",
+        get_average_duration(200, 200, 35, get_euclidean_dist, 500),
+        get_average_duration(100, 100, 35, get_euclidean_dist, 500),
+        get_average_duration(50, 50, 35, get_euclidean_dist, 500),
+    );
+    println!(
+        "{: <10} {: >10}μs {: >10}μs {: >10}μs",
+        "Chebyshev",
+        get_average_duration(200, 200, 35, get_chebyshev_dist, 500),
+        get_average_duration(100, 100, 35, get_chebyshev_dist, 500),
+        get_average_duration(50, 50, 35, get_chebyshev_dist, 500),
     );
 }
 
