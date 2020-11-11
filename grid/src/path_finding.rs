@@ -106,6 +106,8 @@ impl Grid {
         let goal_pos = self.goal.unwrap();
 
         let mut node_map = FxHashMap::default();
+        //reserve space for twice the space needed for the expected length upfront to avoid reallocations
+        node_map.reserve(heuristic(car_pos, goal_pos) as usize * 2);
         node_map.insert(
             car_pos,
             AStarNode {
