@@ -56,7 +56,7 @@ impl Ord for AStarNode {
 impl PartialOrd for AStarNode {
     //They get compared in inversed order
     //so an AStarNode will have more priority if its guessed distance is smaller
-    //if equal the node with the higher depth will be the smaller
+    //if equal the node with the higher depth will have more priority
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match other.guessed_dist.partial_cmp(&self.guessed_dist) {
             Some(Ordering::Equal) => {
